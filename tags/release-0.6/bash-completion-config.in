@@ -1,0 +1,447 @@
+#!%BASH%
+# Copyright 1999-2004 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Id$
+#
+# Author: Aaron Walker <ka0ttic@gentoo.org>
+
+[ -z "${ROOT}" ] && ROOT=""
+if [ ! -e "${ROOT}%FUNCTIONS_SH%" ] ; then
+    echo "${ROOT}%FUNCTIONS_SH% does not exist!"
+    exit 1
+fi
+
+source "${ROOT}%FUNCTIONS_SH%" || exit 1
+
+if [ -z "${HOME}" ] ; then 
+    eerror "HOME environment variable is not set!"
+    exit 1
+fi
+
+###############################################################################
+# variables                                                                   #
+###############################################################################
+
+PACKAGE="%PACKAGE%"
+VERSION="%VERSION%"
+
+# directory in which contributed bash completions are kept
+if [ -z "${BASHCOMP_DIR}" ] ; then
+    BASHCOMP_DIR="$ROOT%DATADIR%/bash-completion"
+# already set in environment; save it, as it will get overridden if set in a
+# config file
+else
+    BASHCOMP_DIR_SAVE="$BASHCOMP_DIR"
+fi
+
+# directory in which symlinks to completions will be locally installed
+if [ -z "${INSTALL_DIR}" ] ; then
+    INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
+# save it
+else
+    INSTALL_DIR_SAVE="$INSTALL_DIR"
+fi
+
+# if the bash-completion package has been installed (and sourced), then
+# the variable, BASH_COMPLETION_DIR should be avail and contain the path
+# to the global install dir
+if [ -n "${BASH_COMPLETION_DIR}" ] ; then
+    GLOBAL_INSTALL_DIR="$BASH_COMPLETION_DIR"
+elif [ -z "${GLOBAL_INSTALL_DIR}" ] ; then
+    GLOBAL_INSTALL_DIR="$ROOT%SYSCONFDIR%/bash_completion.d"
+# save it
+else
+    GLOBAL_INSTALL_DIR_SAVE="$GLOBAL_INSTALL_DIR"
+fi
+
+COLOR_ONE="\033[01;34m"   # blue
+COLOR_TWO="\033[01;32m"   # green
+COLOR_THREE="\033[00;31m" # red
+NO_COLOR="\033[00m"
+
+###############################################################################
+# misc functions                                                              #
+###############################################################################
+
+usage()
+{
+cat << EOF
+Usage: $PACKAGE [ options ] [ <bashcomp1> <bashcomp2> ... ]
+Add/remove bash-completion function(s) to your environment
+
+Options:
+  -h,  --help        Display this help message.
+  -V,  --version     Display version information.
+  -g,  --global      Perform operation system-wide (must be root).
+                     Must be used in conjunction with --install or
+                     --uninstall.
+  -nc, --nocolor, --nocolour
+                     Disable colored output.
+  -l,  --list <all>  Lists currently enabled bash-completions (local
+                     and global).  Takes an optional argument, 'all', which if
+                     specified shows all completions, not just those installed.
+  -i,  --install     Install specified bash-completion(s).
+  -u,  --uninstall   Uninstall specified bash-completion(s).
+
+You may specify an arbitrary number of arguments to --install and --uninstall.
+The arguments may be a path, or just a name, in which case it is assumed to
+exist in $BASHCOMP_DIR.
+
+Read the $PACKAGE(1) manual page for more detailed information.
+EOF
+}
+
+header()
+{
+    echo -e "${COLOR_ONE}${PACKAGE}-${VERSION}${NO_COLOR}\n"
+}
+
+# bleh arg missing
+blarg()
+{
+    echo -e "$1 requires at least one argument!\n"
+    usage
+    exit 1
+}
+
+# config file support is very trivial with bash, since we can treat the config
+# file as a bash script and source it, thus overriding any variables.
+read_config()
+{
+    local localrc="$ROOT/$HOME/.bashcomp-configrc"
+    local globalrc="$ROOT%SYSCONFDIR%/bashcomp-configrc"
+
+    [ -f "${globalrc}" ] && source $globalrc
+    [ -f "${localrc}" ] && source $localrc
+
+    # if the *_SAVE variables are defined, their respective counterpart should
+    # be reset, as the environment should override the config
+    [ -n "${BASHCOMP_DIR_SAVE}" ] && BASHCOMP_DIR="$BASHCOMP_DIR_SAVE"
+    [ -n "${INSTALL_DIR_SAVE}" ] && INSTALL_DIR="$INSTALL_DIR_SAVE"
+    [ -n "${GLOBAL_INSTALL_DIR_SAVE}" ] && \
+        GLOBAL_INSTALL_DIR="$GLOBAL_INSTALL_DIR_SAVE"
+}
+
+# get max filename length in dir $1
+maxfnlen()
+{
+    local len=0 bashcomp
+    for bashcomp in $1/* ; do
+        [ ! -e "${bashcomp}" ] && continue
+        bashcomp="${bashcomp##*/}"
+        [[ ${#bashcomp} -gt $len ]] && len=${#bashcomp}
+    done
+    echo $len
+}
+
+# scans install dirs to figure out where each symlink points to
+# and returns a list of unique paths.  this is so that list() knows
+# which directories to look in when listing.
+getdirs()
+{
+    local i=0 a=0 p dir file dirs
+    
+    # for each install dir
+    for dir in "$@" ; do
+        [ ! -d "${dir}" ] && continue
+        
+        # for each completion
+        for file in $dir/* ; do
+            [ ! -e "${file}" ] && continue
+            
+            # resolve real path ; TODO: '../' links break this...
+            [ -L "${file}" ] && file=$(readlink $file)
+
+            # we only want the directory
+            file="${file%/*}"
+
+            # flag it if the dir is one of the install dirs
+            [[ "${file}" == "${INSTALL_DIR}" || 
+               "${file}" == "${GLOBAL_INSTALL_DIR}" ]] && a=1
+
+            for (( p = 0 ; p < i ; p++ )) ; do
+                # flag it if it's been saved already
+                [[ "${file}" == "${dirs[$p]}" ]] && a=1
+            done
+
+            # skip it?
+            [ ${a} -eq 1 ] && { a=0 && continue; }
+
+            dirs[((i++))]="$file"
+        done
+    done
+
+    echo -n "${dirs[@]}"
+}
+
+set_nocolor()
+{
+    # colors from functions.sh
+    GOOD=
+    BAD=
+    WARN=
+    BRACKET=
+    HILITE=
+    # locally-defined colors
+    COLOR_ONE=
+    COLOR_TWO=
+    COLOR_THREE=
+}
+
+###############################################################################
+# action functions                                                            #
+###############################################################################
+
+list()
+{
+    local n maxlen=$(($(maxfnlen $BASHCOMP_DIR) + 1 ))
+    local label="| Local  Global |"
+    local llen="${#label}"
+
+    header
+    printf "%-${maxlen}s$label\n"
+    for ((n = 1 ; n <= (maxlen + llen) ; n++)) ; do echo -n '-' ; done
+    echo
+   
+    for dir in $(getdirs $INSTALL_DIR $GLOBAL_INSTALL_DIR) ; do
+        for bashcomp in $dir/* ; do
+            local bc="${bashcomp##*/}"
+            local i=3 installed=0 
+            local len="${#bc}"
+            local loc="${INSTALL_DIR}/${bc}"
+            local glob="${GLOBAL_INSTALL_DIR}/${bc}"
+
+            [[ -e "${loc}" || -e "${glob}" ]] && installed=1
+            
+            # skip non-installed unless $1 == "all"
+            if [[ -z "$1" || "$1" != all ]] ; then
+                [ ${installed} -eq 0 ] && continue
+            fi
+
+            # show only the one actually installed...
+            # this prevents showing duplicates if a bashcomp with the same name
+            # exists in more than one of the dirs we traverse
+            local x a=0
+            for x in ${loc} ${glob} ; do
+                [[ -L "${x}" && "$(readlink ${x})" != "${bashcomp}" ]] && a=1
+            done
+            [ ${a} -eq 1 ] && { a=0 && continue; }
+        
+            # two thumbs up ; let's start displaying...
+
+            # name
+            echo -ne "${COLOR_ONE}${bc}${NO_COLOR}"
+            # left |
+            for ((n = 1 ; n <= (maxlen - len) ; n++)) ; do echo -n ' ' ; done
+            echo -n '|'
+
+            # whitespace
+            [[ ! -e "${loc}" && -e "${glob}" ]] && i=10
+            for ((n = 1 ; n <= i ; n++)) ; do echo -n ' ' ; done
+        
+            # * if it's installed
+            [ -e "${loc}" ] && echo -ne "${COLOR_TWO}*${NO_COLOR}"
+            [[ -e "${loc}" && -e "${glob}" ]] && echo -n '       '
+            [ -e "${glob}" ] && echo -ne "${COLOR_THREE}*${NO_COLOR}"
+
+            # if it doesnt exist, a '*' doesnt get printed, so make up for it
+            [ ${installed} -eq 0 ] && (( i-- ))
+            # or they both exist, so compensate
+            [[ -e "${loc}" && -e "${glob}" ]] && i=$(( i + 8 ))
+
+            # right |
+            for ((n = 1 ; n < (llen - (i + 2)) ; n++)) ; do echo -n ' ' ; done
+            echo '|'
+        done
+    done
+
+    for ((n = 1 ; n <= (maxlen + llen) ; n++)) ; do echo -n '-' ; done
+    echo
+
+    return 0
+}
+
+install()
+{
+    local bashcomp file nsuccess=0
+    [ -z "$1" ] && blarg $FUNCNAME
+
+    if [[ -z "${GLOBAL}" && ! -d "${INSTALL_DIR}" ]] ; then
+        mkdir "${INSTALL_DIR}" || return 1
+    fi
+
+    if [[ -n "${GLOBAL}" && ! -d "${GLOBAL_INSTALL_DIR}" ]] ; then
+        mkdir "${GLOBAL_INSTALL_DIR}" || return 1
+    fi
+    
+    header
+    for bashcomp in "$@" ; do
+        # skip options since they've been taken care of already
+        [[ "${bashcomp}" == -* ]] && continue;
+
+        # what form is the argument in?
+        case "${bashcomp}" in
+            /*)     # absolute path
+                file="$bashcomp"        ;;
+                
+            */*)    # relative path
+                file="$PWD/$bashcomp"   ;;
+                
+            *)      # just the name
+                # CWD
+                if [ -f "${bashcomp}" ] ; then
+                    file="$PWD/$bashcomp"
+                # assume BASHCOMP_DIR
+                else
+                    file="$BASHCOMP_DIR/$bashcomp"
+                fi
+                ;;
+        esac
+                
+        if [ ! -e "${file}" ] ; then
+            ewarn "${file##*/} doesn't seem to exist"
+            continue
+        fi
+
+        # already installed
+        if [[ -e "${GLOBAL_INSTALL_DIR}/${bashcomp##*/}" ||
+              -e "${INSTALL_DIR}/${bashcomp##*/}" ]]
+        then
+            ewarn "${bashcomp##*/} is already installed"
+            continue
+        fi
+        
+        rv=0
+        ebegin "Installing ${bashcomp##*/}"
+        if [ -z "${GLOBAL}" ] ; then
+            ln -s "$file" "$INSTALL_DIR" || rv=1
+        else
+            if [ -w "${GLOBAL_INSTALL_DIR}" ] ; then
+                ln -s "$file" "$GLOBAL_INSTALL_DIR" || rv=1
+            else
+                eerror "You do not have correct permissions to install $bashcomp"
+                rv=1
+            fi
+        fi
+        eend $rv
+        [ $rv -eq 0 ] && (( nsuccess++ ))
+    done
+
+    # only show message if !GLOBAL and at least one was installed successfully
+    if [[ -z "${GLOBAL}" && ${nsuccess} -gt 0 ]] ; then
+        echo -ne "\n" \
+        "If you haven't already, add the following to your ~/.bashrc:" \
+        "$COLOR_TWO\n" \
+        "[ -f /etc/profile.d/bash-completion ] && . /etc/profile.d/bash-completion" \
+        "$NO_COLOR\n" \
+        "You must then source your ~/.bashrc for the changes to take effect.\n"
+    fi
+
+    echo
+    return $rv
+}
+
+uninstall()
+{
+    local bashcomp file
+    [ -z "$1" ] && blarg $FUNCNAME
+
+    header
+    for bashcomp in "$@" ; do
+        [[ "${bashcomp}" == -* ]] && continue;
+
+        file="$INSTALL_DIR/$bashcomp"
+        [ -n "${GLOBAL}" ] && file="$GLOBAL_INSTALL_DIR/$bashcomp"
+
+        if [ ! -e "${file}" ] && [ ! -L "${file}" ] ; then
+            ewarn "$bashcomp is not installed"
+            continue
+        fi
+        
+        rv=0
+        ebegin "Uninstalling $bashcomp"
+        if [ -w "${file%/*}" ] ; then
+            rm "$file" || rv=1
+        else
+            eerror "You do not have correct permissions to uninstall $bashcomp"
+            rv=1
+        fi
+        eend $rv
+    done
+    echo
+
+    return $rv
+}
+
+###############################################################################
+# main program                                                                #
+###############################################################################
+
+if [ "$#" -eq 0 ] ; then
+    usage
+    exit 1
+fi
+
+# read configuration
+read_config
+
+# perform toggle operations first
+for opt in "$@" ; do
+    if [[ "${opt}" == '-g' || "${opt}" == '--global' ]] ; then
+        GLOBAL=true
+    elif [[ "${opt}" == '-nc' ]] || [[ "${opt}" == '--nocolor' ]] ||
+         [[ "${opt}" == '--nocolour' ]]
+    then
+        set_nocolor
+    fi
+done
+
+if [ ! -d "${BASHCOMP_DIR}" ] ; then
+    eerror "BASHCOMP_DIR is set to \"$BASHCOMP_DIR\" but does not exist."
+    eerror "This should be set to a directory that contains contributed completions."
+    exit 1
+fi
+
+set -- "$@"
+while true ; do
+    case "$1" in
+	-l|--list)
+            shift
+            list "$@"
+            exit $?
+            ;;
+	-i|--install)
+            shift
+            install "$@"
+            exit $?
+	    ;;
+	-u|--uninstall)
+            shift
+            uninstall "$@"
+            exit $?
+	    ;;
+        -g|--global)
+            shift
+            continue
+            ;;
+        -nc|--nocolor|--nocolour)
+            shift
+            continue
+            ;;
+	-h|--help)
+	    usage
+	    exit 0
+	    ;;
+	-V|--version)
+	    echo "$PACKAGE-$VERSION"
+	    exit 0
+	    ;;
+	*)
+	    echo "Invalid option specified."
+	    echo "Use --help for more information."
+	    exit 1
+	    ;;
+    esac
+done
+
+# vim: set ft=sh tw=80 sw=4 et :

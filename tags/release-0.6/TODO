@@ -1,0 +1,15 @@
+
+Todo List for bash-completion-config
+
+- Handle symlinks as ../blah instead of using abs path
+
+  Added: 2004-11-14  Completed: incomplete
+  Duration: incomplete  Priority: medium
+
+
+- Don't display table if # of installed completions = 0
+
+  Added: 2004-11-14  Completed: incomplete
+  Duration: incomplete  Priority: low
+
+
