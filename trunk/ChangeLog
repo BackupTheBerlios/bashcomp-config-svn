@@ -1,3 +1,11 @@
+Sun Nov 14 15:02:05 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.6
+    Mainly fixes in Makefile install targets and a few other minor fixes.
+    We're getting pretty close to being considered stable, and I'll probably
+    be making the transition from 0.9 => 1.0 rather than 0.10, barring any
+    extreme issues.
+
 Wed Nov 10 07:12:43 2004 Aaron Walker <ka0ttic@gentoo.org>
 
     * Released 0.5
