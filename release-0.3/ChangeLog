@@ -1,0 +1,18 @@
+Mon Nov 01 11:14:13 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.3.
+    Improved parsing of toggle options; doesn't matter if a toggle option
+    is specified after an action option.  Added a no color switch (-nc,
+    --nocolor).  Also, completely overhauled build process; using make to
+    build stuff like we should.  make install now works.
+
+Sat Oct 30 09:59:49 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.2.  
+    Improved --list action.  Better ouput and now accepts an optional 'all'
+    argument.  Fixed bug where --global after --(un)install would attempt to
+    install '--global' literally.
+
+Fri Oct 29 17:37:24 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.1.

@@ -1,0 +1,21 @@
+# $Id$
+
+AC_INIT(bash-completion-config.in)
+AC_CONFIG_AUX_DIR(config)
+AM_INIT_AUTOMAKE(bash-completion-config, 0.3)
+
+test x$prefix = "xNONE" && prefix="$ac_default_prefix"
+test x$datadir = "xNONE" && datadir="$ac_default_datadir"
+test x$sysconfdir = "xNONE" && sysconfdir="$ac_default_sysconfdir"
+
+AC_CHECK_PROGS(BASH, bash)
+if test x$BASH = "x"; then
+    AC_MSG_ERROR([bash is required])
+fi
+
+AC_CHECK_PROGS(SED, sed)
+if test x$SED = "x"; then
+    AC_MSG_ERROR([sed is required])
+fi
+
+AC_OUTPUT(Makefile)
