@@ -45,16 +45,18 @@ Usage: $PACKAGE [options] <bashcomp1> <bashcomp2>
 Add/remove bash-completion function(s) to your environment
 
 Options:
-  -g, --global      Perform operation system-wide (must be root).
-                    Must be used in conjunction with --install or
-                    --uninstall.
-  -h, --help        Display this help message.
-  -V, --version     Display version information.
-  -l, --list <all>  Lists currently enabled bash-completions (local
-                    and global).  Takes an optional argument, 'all', which if
-                    specified shows all completions, not just those installed.
-  -i, --install     Install specified bash-completion(s).
-  -u, --uninstall   Uninstall specified bash-completion(s).
+  -h,  --help        Display this help message.
+  -V,  --version     Display version information.
+  -g,  --global      Perform operation system-wide (must be root).
+                     Must be used in conjunction with --install or
+                     --uninstall.
+  -nc, --nocolor, --nocolour
+                     Disable colored output.
+  -l,  --list <all>  Lists currently enabled bash-completions (local
+                     and global).  Takes an optional argument, 'all', which if
+                     specified shows all completions, not just those installed.
+  -i,  --install     Install specified bash-completion(s).
+  -u,  --uninstall   Uninstall specified bash-completion(s).
 
 You may specify an arbitrary number of arguments to --install and --uninstall.
 The arguments may be a path, or just a name, in which case it is assumed to
@@ -92,13 +94,11 @@ maxfnlen()
 
 list()
 {
-    local n 
-    local maxlen=$(($(maxfnlen $BASHCOMP_DIR) + 1 ))
-
-    header
-    
+    local n maxlen=$(($(maxfnlen $BASHCOMP_DIR) + 1 ))
     local label="| Local  Global |"
     local llen="${#label}"
+
+    header
 
     printf "%-${maxlen}s$label\n"
     for ((n = 1 ; n <= (maxlen + llen) ; n++)) ; do echo -n '-' ; done
@@ -268,6 +268,19 @@ while true ; do
 	    ;;
         -g|--global)
             GLOBAL=yes
+            shift
+            ;;
+        -nc|--nocolor|--nocolour)
+            # colors from functions.sh
+            GOOD=
+            BAD=
+            WARN=
+            BRACKET=
+            HILITE=
+            # locally-defined colors
+            COLOR_ONE=
+            COLOR_TWO=
+            COLOR_THREE=
             shift
             ;;
 	-h|--help)

@@ -1,28 +1,28 @@
 .\" $Id$
 .TH @PACKAGE@ 1 "Nov 2004" "@PACKAGE@ v@VERSION@"
 .SH NAME
-@PACKAGE@ \- Add/remove bash-completion functions to your environment.
+\fB@PACKAGE@\fR \- Add/remove bash-completion functions to your environment.
 .SH SYNOPSIS
-.BI "@PACKAGE@ [ options ] [ <bashcomp1> <bashcomp2> ...  ]"
-.sp
-Options:
-.BI [-ghVliu] [--global --help --version --list --install --uninstall]
-.br
+.B "@PACKAGE@ "
+[ \fIoptions\fR ] <\fIbashcomp1\fR> <\fIbashcomp2\fR> ...  ]
 .SH DESCRIPTION
 \fB@PACKAGE@\fR attempts to ease installation and configuration of contributed
 (ie not include in bash-completion proper) bash completions and allows for both
 per-user and system-wide (see --global) installations.
 .SH OPTIONS
 .TP
-.B "\-g, \-\-global"
-Perform specified operation on a system-wide basis.  Must be used in conjunction
-with --install or --uninstall.
-.TP
 .B "\-h, \-\-help"
 Display usage information.
 .TP
 .B "\-V, \-\-version"
 Display version.
+.TP
+.B "\-nc, \-\-nocolor, \-\-nocolour"
+Disable colored output.
+.TP
+.B "\-g, \-\-global"
+Perform specified operation on a system-wide basis.  Must be used in conjunction
+with --install or --uninstall.
 .TP
 .B "\-l, \-\-list"
 List currently installed completions (local and global).  This option takes an
