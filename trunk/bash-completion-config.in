@@ -150,8 +150,8 @@ getdirs()
         for file in $dir/* ; do
             [ ! -e "${file}" ] && continue
             
-            # resolve real path ; TODO: '../' links break this...
-            [ -L "${file}" ] && file=$(readlink $file)
+            # resolve real path 
+            [ -L "${file}" ] && file=$(readlink -nf $file)
 
             # we only want the directory
             file="${file%/*}"
@@ -224,7 +224,7 @@ list()
             # exists in more than one of the dirs we traverse
             local x a=0
             for x in ${loc} ${glob} ; do
-                [[ -L "${x}" && "$(readlink ${x})" != "${bashcomp}" ]] && a=1
+                [[ -L "${x}" && "$(readlink -nf ${x})" != "${bashcomp}" ]] && a=1
             done
             [ ${a} -eq 1 ] && { a=0 && continue; }
         
