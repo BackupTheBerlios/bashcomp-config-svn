@@ -46,15 +46,17 @@ dist-hook:
 		$(man_MANS:%=%.in)
 		
 install-exec-local:
-	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/profile.d
-	$(INSTALL) profile.d \
-		$(DESTDIR)$(sysconfdir)/profile.d/bash-completion
+	if test ! -e $(DESTDIR)$(sysconfdir)/profile.d/bash-completion ; then \
+		$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/profile.d; \
+		$(INSTALL) profile.d \
+			$(DESTDIR)$(sysconfdir)/profile.d/bash-completion; \
+	fi
 
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(datadir)/bash-completion
 	$(INSTALL_DATA) completion \
 		$(DESTDIR)$(datadir)/bash-completion/@PACKAGE_NAME@
-	if test ! -e /sbin/functions.sh ; then \
+	if test ! -e $(DESTDIR)/sbin/functions.sh ; then \
 		$(mkinstalldirs) $(DESTDIR)$(datadir)/@PACKAGE_NAME@; \
 		$(INSTALL_DATA) functions.sh \
 			$(DESTDIR)$(datadir)/@PACKAGE_NAME@; \
