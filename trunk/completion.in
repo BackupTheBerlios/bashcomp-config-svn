@@ -51,8 +51,7 @@ _bash_completion_config()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="-g --global -l --list -i --install -u --uninstall -h --help \
-        -V --version -nc --nocolor"
+    opts="-g --global -l --list -i --install -u --uninstall -h --help -d --debug -V --version -nc --nocolor"
     
     if [[ "${cur}" == -* || ${COMP_CWORD} -eq 1 ]] ; then
         COMPREPLY=($(compgen -W "${opts}" -- "${cur}"))
@@ -61,7 +60,10 @@ _bash_completion_config()
 
     case "${prev}" in
         -nc|--nocolor|--nocolour)
-            COMPREPLY=($(compgen -W "${opts/-nc --nocolor}" -- "${cur}"))
+            COMPREPLY=($(compgen -W "${opts/-nc --nocolor/}" -- "${cur}"))
+            ;;
+        -d|--debug)
+            COMPREPLY=($(compgen -W "${opts/-d --debug/}" -- "${cur}"))
             ;;
         -g|--global)
             for i in ${COMP_WORDS[@]} ; do

@@ -24,6 +24,11 @@ Disable colored output.
 Perform specified operation on a system-wide basis.  Must be used in conjunction
 with --install or --uninstall.
 .TP
+.B "\-d, \-\-debug"
+Enable debug-mode, which among other things, sets the bash options 'verbose' and 'xtrace'.
+If you encounter a bug, please send the output of %PACKAGE% when run with this option set,
+along with your bug report.
+.TP
 .B "\-l, \-\-list"
 List currently installed completions (local and global).  This option takes an
 optional argument, 'all', which if specified lists all completions, not just those
