@@ -72,6 +72,7 @@ Add/remove bash-completion function(s) to your environment
 Options:
   -h,  --help        Display this help message.
   -V,  --version     Display version information.
+  -d,  --debug       Enable debug-mode.
   -g,  --global      Perform operation system-wide (must be root).
                      Must be used in conjunction with --install or
                      --uninstall.
@@ -377,6 +378,11 @@ uninstall()
 # main program                                                                #
 ###############################################################################
 
+shopts=$-
+shopt -s extglob
+
+trap "set +o verbose +o xtrace ; set -${shopts}" EXIT
+
 if [ "$#" -eq 0 ] ; then
     usage
     exit 1
@@ -389,6 +395,10 @@ read_config
 for opt in "$@" ; do
     if [[ "${opt}" == '-g' || "${opt}" == '--global' ]] ; then
         GLOBAL=true
+    elif [[ "${opt}" == '-d' || "${opt}" == '--debug' ]] ; then
+        _DEBUG=true
+        set -o verbose
+        set -o xtrace
     elif [[ "${opt}" == '-nc' ]] || [[ "${opt}" == '--nocolor' ]] ||
          [[ "${opt}" == '--nocolour' ]]
     then
@@ -421,6 +431,10 @@ while true ; do
             exit $?
 	    ;;
         -g|--global)
+            shift
+            continue
+            ;;
+        -d|--debug)
             shift
             continue
             ;;
