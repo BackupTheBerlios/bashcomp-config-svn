@@ -55,7 +55,7 @@ install-data-local: completion
 	$(mkinstalldirs) $(DESTDIR)$(datadir)/bash-completion
 	$(INSTALL_DATA) completion \
 		$(DESTDIR)$(datadir)/bash-completion/bash-completion-config
-	if test ! -e $(DESTDIR)/sbin/functions.sh ; then \
+	if test ! -e /sbin/functions.sh ; then \
 		$(mkinstalldirs) $(DESTDIR)$(datadir)/$(PACKAGE); \
 		$(INSTALL_DATA) functions.sh $(DESTDIR)$(datadir)/$(PACKAGE); \
 	fi
