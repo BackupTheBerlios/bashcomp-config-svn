@@ -45,7 +45,7 @@ complete_on()
     esac
 }
 
-_%PACKAGE%()
+_bash_completion_config()
 {
     local cur prev opts i a=0
     COMPREPLY=()
@@ -104,6 +104,6 @@ _%PACKAGE%()
     
     unset global
 }
-complete -F _%PACKAGE% %PACKAGE%
+complete -F _bash_completion_config %PACKAGE%
 
 # vim: set ft=sh tw=80 sw=4 et :
