@@ -11,6 +11,11 @@ if ! source $ROOT/sbin/functions.sh ; then
     exit 1
 fi
 
+if [ -z "${HOME}" ] ; then 
+    eerror "HOME environment variable is not set!"
+    exit 1
+fi
+
 ###############################################################################
 # variables 
 ###############################################################################
@@ -18,14 +23,9 @@ fi
 PACKAGE="${0##*/}"
 VERSION="0.1"
 
-ID=$($ROOT/bin/id -u)
-
 # TODO: add command-line switches to specify alt. dirs
 BASHCOMP_DIR="$ROOT/usr/share/bash-completion"
-
-[ -z "${HOME}" ] && HOME="/home/$($ROOT/bin/whoami)"
 INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
-
 GLOBAL_INSTALL_DIR="$ROOT/etc/bash_completion.d"
 
 ###############################################################################
@@ -79,12 +79,7 @@ install()
     [ -z "$1" ] && blarg $FUNCNAME
 
     if [ ! -d "$INSTALL_DIR" ] ; then
-        $ROOT/bin/mkdir "$INSTALL_DIR" || return 1
-    fi
-
-    if [[ -n "${GLOBAL}" && "${ID}" != 0 ]] ; then
-        eerror "You must be root to install system-wide."
-        return 1
+        mkdir "$INSTALL_DIR" || return 1
     fi
     
     for bashcomp in "$@" ; do
@@ -92,16 +87,18 @@ install()
         check_file "$file" || return 1
 
         # already installed
-        if [ -e "${INSTALL_DIR}/${bashcomp}" ] ; then
+        if [ -n "${GLOBAL}" -a -e "${GLOBAL_INSTALL_DIR}/${bashcomp}" ] ||
+           [ -z "${GLOBAL}" -a -e "${INSTALL_DIR}/${bashcomp}" ]
+        then
             ewarn "$bashcomp is already installed"
             continue
         fi
 
         ebegin "Installing $bashcomp"
         if [ -z "${GLOBAL}" ] ; then
-            $ROOT/bin/ln -s "$file" "$INSTALL_DIR"
-        elif [ "${ID}" == 0 ] ; then
-            $ROOT/bin/ln -s "$file" "$GLOBAL_INSTALL_DIR"
+            ln -s "$file" "$INSTALL_DIR"
+        else
+            ln -s "$file" "$GLOBAL_INSTALL_DIR"
         fi
         eend $?
     done
@@ -117,20 +114,21 @@ uninstall()
     local bashcomp file
     [ -z "$1" ] && blarg $FUNCNAME
 
-    if [[ -n "${GLOBAL}" && "${ID}" != 0 ]] ; then
-        eerror "You must be root to uninstall system-wide."
-        return 1
-    fi
-
     for bashcomp in "$@" ; do
         file="$INSTALL_DIR/$bashcomp"
-        check_file "$file" || return 1
+        
+        if [ -n "${GLOBAL}" -a ! -e "${GLOBAL_INSTALL_DIR}/${bashcomp}" ] ||
+           [ -z "${GLOBAL}" -a ! -e "${file}" ]
+        then
+            ewarn "$bashcomp is not installed"
+            continue
+        fi
         
         ebegin "Uninstalling $bashcomp"
         if [ -z "${GLOBAL}" ] ; then
-            $ROOT/bin/rm "$file"
-        elif [ "${ID}" == 0 ] ; then
-            $ROOT/bin/rm "$GLOBAL_INSTALL_DIR/$bashcomp"
+            rm "$file"
+        else
+            rm "$GLOBAL_INSTALL_DIR/$bashcomp"
         fi
         eend $?
     done
