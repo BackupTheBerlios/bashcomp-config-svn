@@ -26,10 +26,21 @@ PACKAGE="%PACKAGE%"
 VERSION="%VERSION%"
 
 # directory in which contributed bash completions are kept
-[ -z "${BASHCOMP_DIR}" ] && BASHCOMP_DIR="$ROOT%DATADIR%/bash-completion"
+if [ -z "${BASHCOMP_DIR}" ] ; then
+    BASHCOMP_DIR="$ROOT%DATADIR%/bash-completion"
+# already set in environment; save it, as it will get overridden if set in a
+# config file
+else
+    BASHCOMP_DIR_SAVE="$BASHCOMP_DIR"
+fi
 
 # directory in which symlinks to completions will be locally installed
-[ -z "${INSTALL_DIR}" ] && INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
+if [ -z "${INSTALL_DIR}" ] ; then
+    INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
+# save it
+else
+    INSTALL_DIR_SAVE="$INSTALL_DIR"
+fi
 
 # if the bash-completion package has been installed (and sourced), then
 # the variable, BASH_COMPLETION_DIR should be avail and contain the path
@@ -38,6 +49,9 @@ if [ -n "${BASH_COMPLETION_DIR}" ] ; then
     GLOBAL_INSTALL_DIR="$BASH_COMPLETION_DIR"
 elif [ -z "${GLOBAL_INSTALL_DIR}" ] ; then
     GLOBAL_INSTALL_DIR="$ROOT%SYSCONFDIR%/bash_completion.d"
+# save it
+else
+    GLOBAL_INSTALL_DIR_SAVE="$GLOBAL_INSTALL_DIR"
 fi
 
 COLOR_ONE="\033[01;34m"   # blue
@@ -86,6 +100,24 @@ blarg()
     echo -e "$1 requires at least one argument!\n"
     usage
     exit 1
+}
+
+# config file support is very trivial with bash, since we can treat the config
+# file as a bash script and source it, thus overriding any variables.
+read_config()
+{
+    local localrc="$ROOT/$HOME/.bashcomp-configrc"
+    local globalrc="$ROOT%SYSCONFDIR%/bashcomp-configrc"
+
+    [ -f "${globalrc}" ] && source $globalrc
+    [ -f "${localrc}" ] && source $localrc
+
+    # if the *_SAVE variables are defined, their respective counterpart should
+    # be reset, as the environment should override the config
+    [ -n "${BASHCOMP_DIR_SAVE}" ] && BASHCOMP_DIR="$BASHCOMP_DIR_SAVE"
+    [ -n "${INSTALL_DIR_SAVE}" ] && INSTALL_DIR="$INSTALL_DIR_SAVE"
+    [ -n "${GLOBAL_INSTALL_DIR_SAVE}" ] && \
+        GLOBAL_INSTALL_DIR="$GLOBAL_INSTALL_DIR_SAVE"
 }
 
 # get max filename length in dir $1
@@ -329,6 +361,9 @@ if [ "$#" -eq 0 ] ; then
     usage
     exit 1
 fi
+
+# read configuration
+read_config
 
 # perform toggle operations first
 for opt in "$@" ; do
