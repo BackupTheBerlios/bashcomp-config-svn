@@ -20,26 +20,26 @@ VERSION="0.1"
 
 ID=$($ROOT/bin/id -u)
 
+# TODO: add command-line switches to specify alt. dirs
 BASHCOMP_DIR="$ROOT/usr/share/bash-completion"
 
-if [ "${ID}" == 0 ] ; then
-    INSTALL_DIR="$ROOT/etc/bash_completion.d"
-else
-    [ -z "${HOME}" ] && HOME="/home/$($ROOT/bin/whoami)"
-    INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
-fi
+[ -z "${HOME}" ] && HOME="/home/$($ROOT/bin/whoami)"
+INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
+
+GLOBAL_INSTALL_DIR="$ROOT/etc/bash_completion.d"
 
 ###############################################################################
-# functions
+# helper functions
 ###############################################################################
 
 usage()
 {
 cat << END
-Usage: $PACKAGE [options] <name>
+Usage: $PACKAGE [options] <name1> <name2>
 Add/remove bash-completion function(s) to your environment
 
 Options:
+  -g, --global      Install bash-completion system-wide (must be root)
   -l, --list        List currently enabled bash-completions
   -i, --install     Install bash-completion
   -u, --uninstall   Uninstall bash-completion
@@ -63,6 +63,11 @@ check_file()
     fi
 }
 
+###############################################################################
+# action functions
+###############################################################################
+
+# TODO
 list()
 {
     echo "$FUNCNAME - TODO"
@@ -77,32 +82,56 @@ install()
         $ROOT/bin/mkdir "$INSTALL_DIR" || return 1
     fi
 
+    if [[ -n "${GLOBAL}" && "${ID}" != 0 ]] ; then
+        eerror "You must be root to install system-wide."
+        return 1
+    fi
+    
     for bashcomp in "$@" ; do
         file="$BASHCOMP_DIR/$bashcomp"
         check_file "$file" || return 1
 
+        # already installed
+        if [ -e "${INSTALL_DIR}/${bashcomp}" ] ; then
+            ewarn "$bashcomp is already installed"
+            continue
+        fi
+
         ebegin "Installing $bashcomp"
-        $ROOT/bin/ln -s "$file" "$INSTALL_DIR"
+        if [ -z "${GLOBAL}" ] ; then
+            $ROOT/bin/ln -s "$file" "$INSTALL_DIR"
+        elif [ "${ID}" == 0 ] ; then
+            $ROOT/bin/ln -s "$file" "$GLOBAL_INSTALL_DIR"
+        fi
         eend $?
     done
 
     echo
     echo "If you haven't already, add the following to your ~/.bashrc:"
     echo "[ -d ~/.bash_completion.d ] && source ~/.bash_completion.d/*"
-    echo
+    echo "You must then source your ~/.bashrc for the changes to take effect."
 }
 
 uninstall()
 {
     local bashcomp file
     [ -z "$1" ] && blarg $FUNCNAME
-    
+
+    if [[ -n "${GLOBAL}" && "${ID}" != 0 ]] ; then
+        eerror "You must be root to uninstall system-wide."
+        return 1
+    fi
+
     for bashcomp in "$@" ; do
         file="$INSTALL_DIR/$bashcomp"
         check_file "$file" || return 1
         
         ebegin "Uninstalling $bashcomp"
-        $ROOT/bin/rm "$file"
+        if [ -z "${GLOBAL}" ] ; then
+            $ROOT/bin/rm "$file"
+        elif [ "${ID}" == 0 ] ; then
+            $ROOT/bin/rm "$GLOBAL_INSTALL_DIR/$bashcomp"
+        fi
         eend $?
     done
 }
@@ -133,6 +162,10 @@ while true ; do
             uninstall "$@"
             exit $?
 	    ;;
+        -g|--global)
+            GLOBAL=yes
+            shift
+            ;;
 	-h|--help)
 	    usage
 	    exit 0
