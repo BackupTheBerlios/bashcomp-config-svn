@@ -43,7 +43,7 @@ dosed = @SED@ -e "s,%BASH%,$(BASH),g" \
 # automatically add month & year to manual page(s) when running 'make dist'
 dist-hook:
 	@SED@ -ie "s/\"[a-zA-Z]\{3\} [0-9]\{4\}\"/\"`date '+%b %Y'`\"/" \
-		$(man_MANS:%=%.in)
+		$(distdir)/$(man_MANS:%=%.in)
 		
 install-exec-local:
 	if test ! -e $(DESTDIR)$(sysconfdir)/profile.d/bash-completion ; then \
