@@ -9,7 +9,7 @@ Mon Nov 01 11:14:13 2004 Aaron Walker <ka0ttic@gentoo.org>
 Sat Oct 30 09:59:49 2004 Aaron Walker <ka0ttic@gentoo.org>
 
     * Released 0.2.  
-    Improved --list action.  Better ouput and now accepts an optional 'all'
+    Improved --list action.  Better output and now accepts an optional 'all'
     argument.  Fixed bug where --global after --(un)install would attempt to
     install '--global' literally.
 

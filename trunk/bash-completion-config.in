@@ -25,11 +25,20 @@ fi
 PACKAGE="%PACKAGE%"
 VERSION="%VERSION%"
 
-# allow user to easily override the defaults
+# directory in which contributed bash completions are kept
 [ -z "${BASHCOMP_DIR}" ] && BASHCOMP_DIR="$ROOT%DATADIR%/bash-completion"
+
+# directory in which symlinks to completions will be locally installed
 [ -z "${INSTALL_DIR}" ] && INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
-[ -z "${GLOBAL_INSTALL_DIR}" ] && \
+
+# if the bash-completion package has been installed (and sourced), then
+# the variable, BASH_COMPLETION_DIR should be avail and contain the path
+# to the global install dir
+if [ -n "${BASH_COMPLETION_DIR}" ] ; then
+    GLOBAL_INSTALL_DIR="$BASH_COMPLETION_DIR"
+elif [ -z "${GLOBAL_INSTALL_DIR}" ] ; then
     GLOBAL_INSTALL_DIR="$ROOT%SYSCONFDIR%/bash_completion.d"
+fi
 
 COLOR_ONE="\033[01;34m"   # blue
 COLOR_TWO="\033[01;32m"   # green
@@ -223,11 +232,11 @@ install()
     local bashcomp file
     [ -z "$1" ] && blarg $FUNCNAME
 
-    if [ ! -d "${INSTALL_DIR}" ] ; then
+    if [[ -z "${GLOBAL}" && ! -d "${INSTALL_DIR}" ]] ; then
         mkdir "${INSTALL_DIR}" || return 1
     fi
 
-    if [ -n "${GLOBAL}" -a ! -d "${GLOBAL_INSTALL_DIR}" ] ; then
+    if [[ -n "${GLOBAL}" && ! -d "${GLOBAL_INSTALL_DIR}" ]] ; then
         mkdir "${GLOBAL_INSTALL_DIR}" || return 1
     fi
     
