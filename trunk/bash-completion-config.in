@@ -1,4 +1,4 @@
-#!/bin/bash
+#!@BASH@
 # Copyright 1999-2004 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
@@ -20,16 +20,16 @@ fi
 # variables 
 ###############################################################################
 
-PACKAGE="${0##*/}"
-VERSION="0.1"
+PACKAGE="@PACKAGE@"
+VERSION="@VERSION@"
 
 # TODO: add command-line switches to specify alt. dirs
-BASHCOMP_DIR="$ROOT/usr/share/bash-completion"
-INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
-GLOBAL_INSTALL_DIR="$ROOT/etc/bash_completion.d"
+BASHCOMP_DIR="$ROOT@BASHCOMP_DIR@"
+INSTALL_DIR="$ROOT/$HOME/@INSTALL_DIR@"
+GLOBAL_INSTALL_DIR="$ROOT@GLOBAL_INSTALL_DIR@"
 
 ###############################################################################
-# helper functions
+# misc functions
 ###############################################################################
 
 usage()
@@ -42,6 +42,8 @@ Options:
   -g, --global      Perform operation system-wide (must be root).
                     Must be used in conjunction with --install or
                     --uninstall.
+  -h, --help        Display this help message.
+  -v, --version     Display version information.
   -l, --list        Lists currently enabled bash-completions (local
                     and global).
   -i, --install     Install specified bash-completion(s).

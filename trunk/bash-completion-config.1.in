@@ -1,0 +1,12 @@
+.\" $Id$
+.TH @PACKAGE@ 1 "Oct 2004" "@PACKAGE@ v@VERSION@" @PACKAGE@
+.SH NAME
+@PACKAGE@ \- Add/remove bash-completion functions to your environment.
+.SH SYNOPSIS
+.BI "@PACKAGE@ [options] <bashcomp1> <bashcomp2>
+.br
+.BI "@PACKAGE@ "
+.SH DESCRIPTION
+@PACKAGE@ attempts to 
+
+

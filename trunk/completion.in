@@ -1,0 +1,92 @@
+# Copyright 1999-2004 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Id$
+#
+# Author: Aaron Walker <ka0ttic@gentoo.org>
+#
+# completion for @PACKAGE@ 
+
+# echo all completions in BASHCOMP_DIR
+complete_avail()
+{
+    local bashcomp BASHCOMP_DIR="@BASHCOMP_DIR@"
+    for bashcomp in $BASHCOMP_DIR/* ; do
+        echo -n "${bashcomp##*/} "
+    done
+}
+
+# echo all installed completions in $1
+complete_installed()
+{
+    local bashcomp
+    for bashcomp in $1/* ; do
+        echo -n "${bashcomp##*/} "
+    done
+}
+
+# show completions for $1
+complete_on()
+{
+    case "$1" in
+        install)
+            COMPREPLY=($(compgen -W "$(complete_avail)" -- "${cur}"))
+            ;;
+        uninstall)
+            if [ -z "$2" ] ; then
+                COMPREPLY=($(compgen -W "$(complete_installed \
+                    ${HOME}/@INSTALL_DIR@)" -- "${cur}"))
+            else
+                COMPREPLY=($(compgen -W "$(complete_installed \
+                @GLOBAL_INSTALL_DIR@)" -- "${cur}"))
+            fi
+            ;;
+    esac
+}
+
+_@PACKAGE@()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="-g --global -l --list -i --install -u --uninstall -h --help \
+        -v --version"
+    
+    if [[ "${cur}" == -* || ${COMP_CWORD} -eq 1 ]] ; then
+        COMPREPLY=($(compgen -W "${opts}" -- "${cur}"))
+        return 0
+    fi
+
+    case "${prev}" in
+        -g|--global)
+            COMPREPLY=($(compgen -W "-i --install -u --uninstall" -- "${cur}"))
+            ;;
+        -i|--install)
+            action=install
+            complete_on "${action}"
+            ;;
+        -u|--uninstall)
+            action=uninstall
+
+            for i in ${COMP_WORDS[@]} ; do
+                if [[ "${i}" == "-g" || "${i}" == "--global" ]] ; then
+                    global=1
+                fi
+            done
+
+            if [ -z "${global}" ] ; then
+                complete_on "${action}"
+            else
+                complete_on "${action}" glob
+            fi
+            ;;
+        *)
+            [ -n "${action}" ] && complete_on "${action}"
+            ;;
+    esac
+    
+    unset global
+}
+complete -F _@PACKAGE@ @PACKAGE@
+
+# vim: set ft=sh tw=80 sw=4 et :
