@@ -143,7 +143,7 @@ getdirs()
     local i=0 a=0 p dir file dirs
     
     # for each install dir
-    for dir in "$@" ; do
+    for dir in $@ ; do
         [ ! -d "${dir}" ] && continue
         
         # for each completion
@@ -276,7 +276,7 @@ install()
     fi
     
     header
-    for bashcomp in "$@" ; do
+    for bashcomp in $@ ; do
         # skip options since they've been taken care of already
         [[ "${bashcomp}" == -* ]] && continue;
 
@@ -348,7 +348,7 @@ uninstall()
     [ -z "$1" ] && blarg $FUNCNAME
 
     header
-    for bashcomp in "$@" ; do
+    for bashcomp in $@ ; do
         [[ "${bashcomp}" == -* ]] && continue;
 
         file="$INSTALL_DIR/$bashcomp"
@@ -380,7 +380,7 @@ uninstall()
 
 shopt -s extglob
 
-if [ "$#" -eq 0 ] ; then
+if [ $# -eq 0 ] ; then
     usage
     exit 1
 fi
@@ -389,7 +389,7 @@ fi
 read_config
 
 # perform toggle operations first
-for opt in "$@" ; do
+for opt in $@ ; do
     if [[ "${opt}" == '-g' || "${opt}" == '--global' ]] ; then
         GLOBAL=true
     elif [[ "${opt}" == '-d' || "${opt}" == '--debug' ]] ; then
@@ -409,7 +409,7 @@ if [ ! -d "${BASHCOMP_DIR}" ] ; then
     exit 1
 fi
 
-set -- "$@"
+set -- $@
 while true ; do
     case "$1" in
 	-l|--list)
