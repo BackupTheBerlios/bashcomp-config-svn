@@ -1,0 +1,152 @@
+#!/bin/bash
+# Copyright 1999-2004 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+#
+# Author: Aaron Walker <ka0ttic@gentoo.org>
+
+[ -z "${ROOT}" ] && ROOT="/"
+if ! source $ROOT/sbin/functions.sh ; then
+    echo "Failed to source /sbin/functions.sh"
+    exit 1
+fi
+
+###############################################################################
+# variables 
+###############################################################################
+
+PACKAGE="${0##*/}"
+VERSION="0.1"
+
+ID=$($ROOT/bin/id -u)
+
+BASHCOMP_DIR="$ROOT/usr/share/bash-completion"
+
+if [ "${ID}" == 0 ] ; then
+    INSTALL_DIR="$ROOT/etc/bash_completion.d"
+else
+    [ -z "${HOME}" ] && HOME="/home/$($ROOT/bin/whoami)"
+    INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
+fi
+
+###############################################################################
+# functions
+###############################################################################
+
+usage()
+{
+cat << END
+Usage: $PACKAGE [options] <name>
+Add/remove bash-completion function(s) to your environment
+
+Options:
+  -l, --list        List currently enabled bash-completions
+  -i, --install     Install bash-completion
+  -u, --uninstall   Uninstall bash-completion
+END
+}
+
+# bleh arg missing
+blarg()
+{
+    echo -e "$1 requires at least one argument!\n"
+    usage
+    exit 1
+}
+
+# check file existence
+check_file()
+{
+    if [ ! -e "$1" ] ; then
+        eerror "${1##*/} doesn't seem to exist."
+        return 1
+    fi
+}
+
+list()
+{
+    echo "$FUNCNAME - TODO"
+}
+
+install()
+{
+    local bashcomp file
+    [ -z "$1" ] && blarg $FUNCNAME
+
+    if [ ! -d "$INSTALL_DIR" ] ; then
+        $ROOT/bin/mkdir "$INSTALL_DIR" || return 1
+    fi
+
+    for bashcomp in "$@" ; do
+        file="$BASHCOMP_DIR/$bashcomp"
+        check_file "$file" || return 1
+
+        ebegin "Installing $bashcomp"
+        $ROOT/bin/ln -s "$file" "$INSTALL_DIR"
+        eend $?
+    done
+
+    echo
+    echo "If you haven't already, add the following to your ~/.bashrc:"
+    echo "[ -d ~/.bash_completion.d ] && source ~/.bash_completion.d/*"
+    echo
+}
+
+uninstall()
+{
+    local bashcomp file
+    [ -z "$1" ] && blarg $FUNCNAME
+    
+    for bashcomp in "$@" ; do
+        file="$INSTALL_DIR/$bashcomp"
+        check_file "$file" || return 1
+        
+        ebegin "Uninstalling $bashcomp"
+        $ROOT/bin/rm "$file"
+        eend $?
+    done
+}
+
+###############################################################################
+# main program
+###############################################################################
+
+if [ "$#" -eq 0 ] ; then
+    usage
+    exit 1
+fi
+
+set -- "$@"
+while true ; do
+    case "$1" in
+	-l|--list)
+            list
+            exit $?
+            ;;
+	-i|--install)
+            shift
+            install "$@"
+            exit $?
+	    ;;
+	-u|--uninstall)
+            shift
+            uninstall "$@"
+            exit $?
+	    ;;
+	-h|--help)
+	    usage
+	    exit 0
+	    ;;
+	-v|--version)
+	    echo "$PACKAGE-$VERSION"
+	    exit 0
+	    ;;
+	*)
+	    echo "Invalid option specified."
+	    echo "Use --help for more information."
+	    exit 1
+	    ;;
+    esac
+done
+
+# vim: set tw=80 sw=4 et :
