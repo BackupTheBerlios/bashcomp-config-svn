@@ -275,10 +275,26 @@ install()
     header
     for bashcomp in "$@" ; do
         [[ "${bashcomp}" == -* ]] && continue;
-        
-        file="$BASHCOMP_DIR/${bashcomp##*/}"
-        [[ "${bashcomp}" == */* ]] && file=$bashcomp # a path was given
-        
+
+        # what form is the argument in?
+        case "${bashcomp}" in
+            /*)     # absolute path
+                file="$bashcomp"        ;;
+                
+            */*)    # relative path
+                file="$PWD/$bashcomp"   ;;
+                
+            *)      # just the name
+                # CWD
+                if [ -f "${bashcomp}" ] ; then
+                    file="$PWD/$bashcomp"
+                # assume BASHCOMP_DIR
+                else
+                    file="$BASHCOMP_DIR/$bashcomp"
+                fi
+                ;;
+        esac
+                
         if [ ! -e "${file}" ] ; then
             ewarn "${file##*/} doesn't seem to exist"
             continue
