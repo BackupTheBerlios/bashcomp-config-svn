@@ -1,7 +1,3 @@
-- Implement my own funcs from functions.sh, so that it is not a requirement (and hence can run
-  on non-gentoo boxen)
+- Implement fallback if functions.sh is not available
   (added 10/28/04, 10:27, incomplete, priority high)
-
-- Add command-line switches for setting BASHCOMP_DIR, INSTALL_DIR, and GLOBAL_INSTALL_DIR
-  (added 10/28/04, 10:22, incomplete, priority medium)
 
