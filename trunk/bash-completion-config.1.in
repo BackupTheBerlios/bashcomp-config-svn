@@ -4,7 +4,7 @@
 \fB%PACKAGE%\fR \- Add/remove bash-completion functions to your environment.
 .SH SYNOPSIS
 .B "%PACKAGE% "
-[ \fIoptions\fR ] <\fIbashcomp1\fR> <\fIbashcomp2\fR> ...  ]
+[ \fIoptions\fR ] [ <\fIbashcomp1\fR> <\fIbashcomp2\fR> ...  ]
 .SH DESCRIPTION
 \fB%PACKAGE%\fR attempts to ease installation and configuration of contributed
 (ie not include in bash-completion proper) bash completions and allows for both
