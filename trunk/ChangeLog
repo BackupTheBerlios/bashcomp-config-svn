@@ -1,3 +1,10 @@
+Wed Nov 03 09:15:04 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.4.
+    Added minimal functions.sh for non-Gentoo platforms.  Added rc file
+    support.  Lots of misc bug fixes, including one in --list where it
+    would not list any completions installed by specifying a path.
+
 Mon Nov 01 11:14:13 2004 Aaron Walker <ka0ttic@gentoo.org>
 
     * Released 0.3.
