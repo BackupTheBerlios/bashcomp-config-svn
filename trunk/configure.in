@@ -18,6 +18,9 @@ if test x$SED = "x"; then
     AC_MSG_ERROR([sed is required])
 fi
 
+# using this rather than AC_CHECK_FILE, as it brings in gcc checks for
+# some reason
+
 AC_MSG_CHECKING([for functions.sh])
 if test -e /sbin/functions.sh; then
     FUNCTIONS_SH="/sbin/functions.sh"
