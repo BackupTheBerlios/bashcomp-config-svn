@@ -6,10 +6,12 @@
 # Author: Aaron Walker <ka0ttic%gentoo.org>
 
 [ -z "${ROOT}" ] && ROOT=""
-if ! source $ROOT/sbin/functions.sh ; then
-    echo "Failed to source /sbin/functions.sh"
+if [ ! -e "${ROOT}%FUNCTIONS_SH%" ] ; then
+    echo "${ROOT}%FUNCTIONS_SH% does not exist!"
     exit 1
 fi
+
+source "${ROOT}%FUNCTIONS_SH%" || exit 1
 
 if [ -z "${HOME}" ] ; then 
     eerror "HOME environment variable is not set!"
@@ -88,6 +90,48 @@ maxfnlen()
     echo $len
 }
 
+# scans install dirs to figure out where each symlink points to
+# and returns a list of unique paths.  this is so that list() knows
+# which directories to look in when listing.
+getdirs()
+{
+    local i=0 a=0 p dir file dirs
+    
+    # for each install dir
+    for dir in "$@" ; do
+        [ ! -d "${dir}" ] && continue
+        
+        # for each completion
+        for file in $dir/* ; do
+            [ ! -e "${file}" ] && continue
+            
+            # resolve real path ; TODO: '../' links break this...
+            [ -L "${file}" ] && file=$(readlink $file)
+
+            # we only want the directory
+            file="${file%/*}"
+
+            # skip if the dir is one of the install dirs
+            [[ "${file}" == "${INSTALL_DIR}" || 
+               "${file}" == "${GLOBAL_INSTALL_DIR}" ]] && a=1
+
+            for (( p = 0 ; p < i ; p++ )) ; do
+                # skip it if it's been saved already
+                [[ "${file}" == "${dirs[$p]}" ]] && a=1
+            done
+            [ $a -eq 1 ] && { a=0 && continue; }
+
+            dirs[((i++))]="$file"
+        done
+    done
+
+    #for (( p = 0 ; p < i ; p++ )) ; do
+    #    echo -n "${dirs[$p]} "
+    #done
+    echo -n "${dirs[@]}"
+}
+
+
 set_nocolor()
 {
     # colors from functions.sh
@@ -117,35 +161,37 @@ list()
     printf "%-${maxlen}s$label\n"
     for ((n = 1 ; n <= (maxlen + llen) ; n++)) ; do echo -n '-' ; done
     echo
-    
-    for bashcomp in $BASHCOMP_DIR/* ; do
-        bashcomp="${bashcomp##*/}"
-        local i=3 exists=0 len="${#bashcomp}"
-        local loc="${INSTALL_DIR}/${bashcomp}"
-        local glob="${GLOBAL_INSTALL_DIR}/${bashcomp}"
+   
+    for dir in $(getdirs $INSTALL_DIR $GLOBAL_INSTALL_DIR) ; do
+        for bashcomp in $dir/* ; do
+            bashcomp="${bashcomp##*/}"
+            local i=3 exists=0 len="${#bashcomp}"
+            local loc="${INSTALL_DIR}/${bashcomp}"
+            local glob="${GLOBAL_INSTALL_DIR}/${bashcomp}"
         
-        [[ -e "${loc}" || -e "${glob}" ]] && exists=1
+            [[ -e "${loc}" || -e "${glob}" ]] && exists=1
         
-        # skip non-installed unless $1 == "all"
-        if [[ -z "$1" || "$1" != all ]] ; then
-            [ ${exists} -eq 0 ] && continue
-        fi
+            # skip non-installed unless $1 == "all"
+            if [[ -z "$1" || "$1" != all ]] ; then
+                [ ${exists} -eq 0 ] && continue
+            fi
         
-        echo -ne "${COLOR_ONE}${bashcomp}${NO_COLOR}"        
-        for ((n = 1 ; n <= (maxlen - len) ; n++)) ; do echo -n ' ' ; done
-        echo -n '|'
+            echo -ne "${COLOR_ONE}${bashcomp}${NO_COLOR}"        
+            for ((n = 1 ; n <= (maxlen - len) ; n++)) ; do echo -n ' ' ; done
+            echo -n '|'
 
-        [[ ! -e "${loc}" && -e "${glob}" ]] && i=10
-        for ((n = 1 ; n <= i ; n++)) ; do echo -n ' ' ; done
+            [[ ! -e "${loc}" && -e "${glob}" ]] && i=10
+            for ((n = 1 ; n <= i ; n++)) ; do echo -n ' ' ; done
         
-        [ -e "${loc}" ] && echo -ne "${COLOR_TWO}*${NO_COLOR}"
-        [ -e "${glob}" ] && echo -ne "${COLOR_THREE}*${NO_COLOR}"
+            [ -e "${loc}" ] && echo -ne "${COLOR_TWO}*${NO_COLOR}"
+            [ -e "${glob}" ] && echo -ne "${COLOR_THREE}*${NO_COLOR}"
 
-        # if it doesnt exist, a '*' doesnt get printed, so make up for it
-        [ ${exists} -eq 0 ] && ((i--))
+            # if it doesnt exist, a '*' doesnt get printed, so make up for it
+            [ ${exists} -eq 0 ] && ((i--))
         
-        for ((n = 1 ; n < (llen - (i + 2)) ; n++)) ; do echo -n ' ' ; done
-        echo '|'
+            for ((n = 1 ; n < (llen - (i + 2)) ; n++)) ; do echo -n ' ' ; done
+            echo '|'
+        done
     done
 
     for ((n = 1 ; n <= (maxlen + llen) ; n++)) ; do echo -n '-' ; done
@@ -168,10 +214,6 @@ install()
     header
     for bashcomp in "$@" ; do
         [[ "${bashcomp}" == -* ]] && continue;
-        #if [[ "${bashcomp}" == "-g" || "${bashcomp}" == "--global" ]] ; then
-        #    GLOBAL=true
-        #    continue;
-        #fi
         
         file="$BASHCOMP_DIR/${bashcomp##*/}"
         [[ "${bashcomp}" == */* ]] && file=$bashcomp # a path was given
@@ -226,11 +268,6 @@ uninstall()
     header
     for bashcomp in "$@" ; do
         [[ "${bashcomp}" == -* ]] && continue;
-        # in case --global is passed after --uninstall
-        #if [[ "${bashcomp}" == "-g" || "${bashcomp}" == "--global" ]] ; then
-        #    GLOBAL=true
-        #    continue
-        #fi
 
         file="$INSTALL_DIR/$bashcomp"
         [ -n "${GLOBAL}" ] && file="$GLOBAL_INSTALL_DIR/$bashcomp"
@@ -274,6 +311,12 @@ for opt in "$@" ; do
         set_nocolor
     fi
 done
+
+if [ ! -d "${BASHCOMP_DIR}" ] ; then
+    eerror "BASHCOMP_DIR is set to \"$BASHCOMP_DIR\" but does not exist."
+    eerror "This should be set to a directory that contains contributed completions."
+    exit 1
+fi
 
 set -- "$@"
 while true ; do

@@ -2,7 +2,7 @@
 
 AC_INIT(bash-completion-config.in)
 AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(bash-completion-config, 0.3)
+AM_INIT_AUTOMAKE(bash-completion-config, 0.4)
 
 test x$prefix = "xNONE" && prefix="$ac_default_prefix"
 test x$datadir = "xNONE" && datadir="$ac_default_datadir"
@@ -17,5 +17,15 @@ AC_CHECK_PROGS(SED, sed)
 if test x$SED = "x"; then
     AC_MSG_ERROR([sed is required])
 fi
+
+AC_MSG_CHECKING([for functions.sh])
+if test -e /sbin/functions.sh; then
+    FUNCTIONS_SH="/sbin/functions.sh"
+    AC_MSG_RESULT([yes])
+else
+    FUNCTIONS_SH="$datadir/$PACKAGE/functions.sh"
+    AC_MSG_RESULT([no])
+fi
+AC_SUBST(FUNCTIONS_SH)
 
 AC_OUTPUT(Makefile)
