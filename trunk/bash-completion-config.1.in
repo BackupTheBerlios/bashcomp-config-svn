@@ -1,17 +1,54 @@
 .\" $Id$
-.TH @PACKAGE@ 1 "Oct 2004" "@PACKAGE@ v@VERSION@"
+.TH @PACKAGE@ 1 "Nov 2004" "@PACKAGE@ v@VERSION@"
 .SH NAME
 @PACKAGE@ \- Add/remove bash-completion functions to your environment.
 .SH SYNOPSIS
-.BI "@PACKAGE@ [options] <bashcomp1> <bashcomp2>
+.BI "@PACKAGE@ [ options ] [ <bashcomp1> <bashcomp2> ...  ]"
+.sp
+Options:
+.BI [-ghVliu] [--global --help --version --list --install --uninstall]
 .br
-.BI "@PACKAGE@ "
 .SH DESCRIPTION
-@PACKAGE@ attempts to 
-
+\fB@PACKAGE@\fR attempts to ease installation and configuration of contributed
+(ie not include in bash-completion proper) bash completions and allows for both
+per-user and system-wide (see --global) installations.
 .SH OPTIONS
-
+.TP
+.B "\-g, \-\-global"
+Perform specified operation on a system-wide basis.  Must be used in conjunction
+with --install or --uninstall.
+.TP
+.B "\-h, \-\-help"
+Display usage information.
+.TP
+.B "\-V, \-\-version"
+Display version.
+.TP
+.B "\-l, \-\-list"
+List currently installed completions (local and global).
+.TP
+.B "\-i, \-\-install"
+Install specified completion(s).  Takes an arbitrary number of completions to
+install.  Each argument may be a path, or just a name, in which case it will
+be assumed to exist in @DATADIR@/bash-completion.  Installs locally, unless
+--global is previously specified.
+.TP
+.B "\-u, \-\-uninstall"
+Uninstall specified completion(s).  Takes an arbitrary number of completions
+to uninstall.  Each argument should be just the name of the completion.  
+Uninstalls locally, unless --global is previously specified.
 .SH ENVIRONMENT
-BASHCOMP_DIR
-INSTALL_DIR
-GLOBAL_INSTALL_DIR
+.TP
+.B BASHCOMP_DIR
+Location of contributed bash completions.  Defaults to @DATADIR@/bash-completion.
+.TP
+.B INSTALL_DIR
+Location of local installation directory.  Defaults to $HOME/.bash_completion.d.
+.TP
+.B GLOBAL_INSTALL_DIR
+Location of global installation directory.  Defaults to @SYSCONFDIR@/bash_completion.d.
+.SH SEE ALSO
+.TP
+.B bash(1)
+.SH NOTES
+Please report any bugs to http://bugs.gentoo.org/.
