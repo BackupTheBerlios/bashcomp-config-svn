@@ -153,7 +153,8 @@ install()
     if [ -z "${GLOBAL}" ] ; then
         echo
         echo "If you haven't already, add the following to your ~/.bashrc:"
-        echo "[ -d ~/.bash_completion.d ] && source ~/.bash_completion.d/*"
+        echo '[ -d ~/.bash_completion.d ] && \'
+        echo '{ for i in ~/.bash_completion.d/*; do [ -f $i ] && . $i; done }'
         echo "You must then source your ~/.bashrc for the changes to take effect."
     fi
 }
