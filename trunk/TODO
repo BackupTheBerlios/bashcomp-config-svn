@@ -6,3 +6,7 @@ created by: ka0ttic on: 11/03/04
 
 [note] Handle symlinks as ../blah instead of the abs path
 created by: ka0ttic on: 11/03/04
+
+[note] Fix bug, where if a path is passed to --install, that isnt absolute, it will get linked incorrectly
+created by: ka0ttic on: 11/04/04
+
