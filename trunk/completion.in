@@ -27,13 +27,14 @@ complete_installed()
 # show completions for $1
 complete_on()
 {
-    case "$1" in
+    local cur="$1"
+
+    case "$2" in
         install)
-            COMPREPLY=($(compgen -o filenames -A file -W "$(complete_avail)" \
-                -- "${cur}"))
+            COMPREPLY=($(compgen -f -W "$(complete_avail)" -- "${cur}"))
             ;;
         uninstall)
-            if [ -z "$2" ] ; then
+            if [ -z "$3" ] ; then
                 COMPREPLY=($(compgen -W "$(complete_installed \
                     ${HOME}/.bash_completion.d)" -- "${cur}"))
             else
@@ -72,14 +73,14 @@ _%PACKAGE%()
             
             if [ ${a} -gt 0 ] ; then
                 action=install
-                complete_on "${action}"
+                complete_on "${cur}" "${action}"
             else
                 COMPREPLY=($(compgen -W "-i --install -u --uninstall" -- "${cur}"))
             fi
             ;;
         -i|--install)
             action=install
-            complete_on "${action}"
+            complete_on "${cur}" "${action}"
             ;;
         -u|--uninstall)
             action=uninstall
@@ -91,13 +92,13 @@ _%PACKAGE%()
             done
 
             if [ -z "${global}" ] ; then
-                complete_on "${action}"
+                complete_on "${cur}" "${action}"
             else
-                complete_on "${action}" glob
+                complete_on "${cur}" "${action}" glob
             fi
             ;;
         *)
-            [ -n "${action}" ] && complete_on "${action}"
+            [ -n "${action}" ] && complete_on "${cur}" "${action}"
             ;;
     esac
     
