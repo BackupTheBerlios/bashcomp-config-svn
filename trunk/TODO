@@ -1,12 +1,6 @@
-- Implement fallback if functions.sh is not available
+[bash-completion-config] 
+created by: ka0ttic on: 11/01/04
 
-  Added: 10/30/04, 06:32  Completed: incomplete
-  Duration: incomplete  Priority: veryhigh
-
-
-- Get make install to work properly
-
-  Added: 10/30/04, 18:24  Completed: incomplete
-  Duration: incomplete  Priority: high
-
+[note] Implement functions.sh fallback
+created by: ka0ttic on: 11/01/04
 

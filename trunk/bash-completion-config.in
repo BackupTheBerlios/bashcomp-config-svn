@@ -1,9 +1,9 @@
-#!@BASH@
+#!%BASH%
 # Copyright 1999-2004 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 #
-# Author: Aaron Walker <ka0ttic@gentoo.org>
+# Author: Aaron Walker <ka0ttic%gentoo.org>
 
 [ -z "${ROOT}" ] && ROOT=""
 if ! source $ROOT/sbin/functions.sh ; then
@@ -20,14 +20,14 @@ fi
 # variables 
 ###############################################################################
 
-PACKAGE="@PACKAGE@"
-VERSION="@VERSION@"
+PACKAGE="%PACKAGE%"
+VERSION="%VERSION%"
 
 # allow user to easily override the defaults
-[ -z "${BASHCOMP_DIR}" ] && BASHCOMP_DIR="$ROOT@DATADIR@/bash-completion"
+[ -z "${BASHCOMP_DIR}" ] && BASHCOMP_DIR="$ROOT%DATADIR%/bash-completion"
 [ -z "${INSTALL_DIR}" ] && INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
 [ -z "${GLOBAL_INSTALL_DIR}" ] && \
-    GLOBAL_INSTALL_DIR="$ROOT@SYSCONFDIR@/bash_completion.d"
+    GLOBAL_INSTALL_DIR="$ROOT%SYSCONFDIR%/bash_completion.d"
 
 COLOR_ONE="\033[01;34m"   # blue
 COLOR_TWO="\033[01;32m"   # green
@@ -41,7 +41,7 @@ NO_COLOR="\033[00m"
 usage()
 {
 cat << END
-Usage: $PACKAGE [options] <bashcomp1> <bashcomp2>
+Usage: $PACKAGE [ options ] [ <bashcomp1> <bashcomp2> ... ]
 Add/remove bash-completion function(s) to your environment
 
 Options:

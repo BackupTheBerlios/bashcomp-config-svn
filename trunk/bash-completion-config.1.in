@@ -1,12 +1,12 @@
 .\" $Id$
-.TH @PACKAGE@ 1 "Nov 2004" "@PACKAGE@ v@VERSION@"
+.TH "%PACKAGE%" 1 "Nov 2004" "%VERSION%"
 .SH NAME
-\fB@PACKAGE@\fR \- Add/remove bash-completion functions to your environment.
+\fB%PACKAGE%\fR \- Add/remove bash-completion functions to your environment.
 .SH SYNOPSIS
-.B "@PACKAGE@ "
+.B "%PACKAGE% "
 [ \fIoptions\fR ] <\fIbashcomp1\fR> <\fIbashcomp2\fR> ...  ]
 .SH DESCRIPTION
-\fB@PACKAGE@\fR attempts to ease installation and configuration of contributed
+\fB%PACKAGE%\fR attempts to ease installation and configuration of contributed
 (ie not include in bash-completion proper) bash completions and allows for both
 per-user and system-wide (see --global) installations.
 .SH OPTIONS
@@ -32,7 +32,7 @@ installed.
 .B "\-i, \-\-install"
 Install specified completion(s).  Takes an arbitrary number of completions to
 install.  Each argument may be a path, or just a name, in which case it will
-be assumed to exist in @DATADIR@/bash-completion.  Installs locally, unless
+be assumed to exist in %DATADIR%/bash-completion.  Installs locally, unless
 --global is previously specified.
 .TP
 .B "\-u, \-\-uninstall"
@@ -42,13 +42,13 @@ Uninstalls locally, unless --global is previously specified.
 .SH ENVIRONMENT
 .TP
 .B BASHCOMP_DIR
-Location of contributed bash completions.  Defaults to @DATADIR@/bash-completion.
+Location of contributed bash completions.  Defaults to %DATADIR%/bash-completion.
 .TP
 .B INSTALL_DIR
 Location of local installation directory.  Defaults to $HOME/.bash_completion.d.
 .TP
 .B GLOBAL_INSTALL_DIR
-Location of global installation directory.  Defaults to @SYSCONFDIR@/bash_completion.d.
+Location of global installation directory.  Defaults to %SYSCONFDIR%/bash_completion.d.
 .SH SEE ALSO
 .TP
 .B bash(1)
