@@ -1,5 +1,5 @@
 .\" $Id$
-.TH @PACKAGE@ 1 "Oct 2004" "@PACKAGE@ v@VERSION@" @PACKAGE@
+.TH @PACKAGE@ 1 "Oct 2004" "@PACKAGE@ v@VERSION@"
 .SH NAME
 @PACKAGE@ \- Add/remove bash-completion functions to your environment.
 .SH SYNOPSIS

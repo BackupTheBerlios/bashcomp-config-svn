@@ -24,9 +24,13 @@ PACKAGE="@PACKAGE@"
 VERSION="@VERSION@"
 
 # TODO: add command-line switches to specify alt. dirs
-BASHCOMP_DIR="$ROOT@BASHCOMP_DIR@"
-INSTALL_DIR="$ROOT/$HOME/@INSTALL_DIR@"
-GLOBAL_INSTALL_DIR="$ROOT@GLOBAL_INSTALL_DIR@"
+BASHCOMP_DIR="$ROOT@DATADIR@/bash-completion"
+INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
+GLOBAL_INSTALL_DIR="$ROOT@SYSCONFDIR@/bash_completion.d"
+
+COLOR_ONE="\033[01;34m" # blue
+COLOR_TWO="\033[01;32m" # green
+NO_COLOR="\033[00m"
 
 ###############################################################################
 # misc functions
@@ -68,14 +72,52 @@ check_file()
     fi
 }
 
+# get max filename length in dir $1
+maxfnlen()
+{
+    local len=0 bashcomp
+    for bashcomp in $1/* ; do
+        bashcomp="${bashcomp##*/}"
+        [[ ${#bashcomp} -gt $len ]] && len=${#bashcomp}
+    done
+    echo $len
+}
+
 ###############################################################################
 # action functions
 ###############################################################################
 
-# TODO
 list()
 {
-    echo "$FUNCNAME - TODO"
+    local n 
+    local maxlen=$(($(maxfnlen $BASHCOMP_DIR) + 1 ))
+
+    printf "%-${maxlen}s| Local  Global |\n"
+    for ((n = 1 ; n <= (maxlen + 17) ; n++)) ; do
+        echo -n -
+    done
+    echo
+    
+    for bashcomp in $BASHCOMP_DIR/* ; do
+        bashcomp="${bashcomp##*/}"
+        local i=3
+        local loc="${INSTALL_DIR}/${bashcomp}"
+        local glob="${GLOBAL_INSTALL_DIR}/${bashcomp}"
+        local len="${#bashcomp}"
+        
+        [[ ! -e "${loc}" && ! -e "${glob}" ]] && continue
+        
+        echo -ne "${COLOR_ONE}${bashcomp}${NO_COLOR}"        
+        for ((n = 1 ; n <= (maxlen - len) ; n++)) ; do echo -n ' ' ; done
+        echo -n '|'
+
+        [[ ! -e "${loc}" && -e "${glob}" ]] && i=10
+        for ((n = 1 ; n <= i ; n++)) ; do echo -n ' ' ; done
+        
+        [ -e "${loc}" ] && echo -ne "${COLOR_TWO}*${NO_COLOR}"
+        [ -e "${glob}" ] && echo -ne "${COLOR_TWO}*${NO_COLOR}"
+        echo
+    done
 }
 
 install()
