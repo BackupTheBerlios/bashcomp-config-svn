@@ -1,6 +1,6 @@
 # $Id$
 
-AUTOMAKE_OPTIONS = foreign dist-bzip2
+AUTOMAKE_OPTIONS = foreign dist-bzip2 no-dist-gzip
 
 bin_SCRIPTS = bash-completion-config
 man_MANS = bash-completion-config.1
