@@ -1,55 +1,43 @@
 # $Id$
 
+AUTOMAKE_OPTIONS = foreign
+
 bin_SCRIPTS = bash-completion-config
 man_MANS = bash-completion-config.1
+noinst_DATA = completion
 
-CLEANFILES = bash-completion-config \
-	     bash-completion-config.1 \
-	     completion
+CLEANFILES = $(bin_SCRIPTS) \
+	     $(man_MANS) \
+	     $(noinst_DATA)
 
 MAINTAINERCLEANFILES = aclocal.m4 \
 		       configure \
-		       Makefile.in
+		       Makefile.in \
 		       config/config.guess \
 		       config/ltmain.sh \
 		       config/config.sub
 		       
-EXTRA_DIST = bash-completion-config.in \
-	     bash-completion-config.1.in \
-	     completion.in \
+EXTRA_DIST = $(bin_SCRIPTS:%=%.in) \
+	     $(man_MANS:%=%.in) \
+	     $(noinst_DATA:%=%.in) \
 	     autogen.sh \
-	     functions.sh
-
-all: bash-completion-config bash-completion-config.1 completion
+	     functions.sh \
+	     config/
 
 # have to use %VAR% here instead of @VAR@ or it will attempt
 # to expand the variable
+dosed = @SED@ -e "s,%BASH%,$(BASH),g" \
+	      -e "s,%FUNCTIONS_SH%,$(FUNCTIONS_SH),g" \
+	      -e "s,%PACKAGE%,$(PACKAGE),g" \
+	      -e "s,%VERSION%,$(VERSION),g" \
+	      -e "s,%DATADIR%,$(datadir),g" \
+	      -e "s,%SYSCONFDIR%,$(sysconfdir),g" 
 
-bash-completion-config: bash-completion-config.in
-	@echo " * building bash-completion-config"
-	@@SED@ -e "s,%BASH%,$(BASH),g" \
-	       -e "s,%FUNCTIONS_SH%,$(FUNCTIONS_SH),g" \
-	       -e "s,%PACKAGE%,$(PACKAGE),g" \
-	       -e "s,%VERSION%,$(VERSION),g" \
-	       -e "s,%DATADIR%,$(datadir),g" \
-	       -e "s,%SYSCONFDIR%,$(sysconfdir),g" \
-	       bash-completion-config.in > bash-completion-config
-	@chmod +x bash-completion-config
-
-bash-completion-config.1: bash-completion-config.1.in
-	@echo " * building bash-completion-config.1"
-	@@SED@ -e "s,%PACKAGE%,$(PACKAGE),g" \
-	       -e "s,%VERSION%,$(VERSION),g" \
-	       -e "s,%DATADIR%,$(datadir),g" \
-	       -e "s,%SYSCONFDIR%,$(sysconfdir),g" \
-	       bash-completion-config.1.in > bash-completion-config.1
-
-completion: completion.in
-	@echo " * building completion"
-	@@SED@ -e "s,%PACKAGE%,$(PACKAGE),g" \
-	       -e "s,%DATADIR%,$(datadir),g" \
-	       -e "s,%SYSCONFDIR%,$(sysconfdir),g" \
-	       completion.in > completion
+%: %.in
+	@echo " * building $@"
+	@$(dosed) $< > $@
+	@if test $@ = $(bin_SCRIPTS); then chmod +x $@; fi
+	
 
 install-data-local: completion
 	$(mkinstalldirs) $(DESTDIR)$(datadir)/bash-completion
