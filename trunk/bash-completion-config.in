@@ -23,7 +23,6 @@ fi
 PACKAGE="@PACKAGE@"
 VERSION="@VERSION@"
 
-# TODO: add command-line switches to specify alt. dirs
 BASHCOMP_DIR="$ROOT@DATADIR@/bash-completion"
 INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
 GLOBAL_INSTALL_DIR="$ROOT@SYSCONFDIR@/bash_completion.d"
@@ -39,7 +38,7 @@ NO_COLOR="\033[00m"
 usage()
 {
 cat << END
-Usage: $PACKAGE [options] <name1> <name2>
+Usage: $PACKAGE [options] <bashcomp1> <bashcomp2>
 Add/remove bash-completion function(s) to your environment
 
 Options:
@@ -52,6 +51,10 @@ Options:
                     and global).
   -i, --install     Install specified bash-completion(s).
   -u, --uninstall   Uninstall specified bash-completion(s).
+
+You may specify an arbitrary number of arguments to --install and --uninstall.
+The arguments may be a full path, or just a name, in which case it will be
+assumed to exist in $BASHCOMP_DIR.
 END
 }
 
@@ -100,10 +103,9 @@ list()
     
     for bashcomp in $BASHCOMP_DIR/* ; do
         bashcomp="${bashcomp##*/}"
-        local i=3
+        local i=3 len="${#bashcomp}"
         local loc="${INSTALL_DIR}/${bashcomp}"
         local glob="${GLOBAL_INSTALL_DIR}/${bashcomp}"
-        local len="${#bashcomp}"
         
         [[ ! -e "${loc}" && ! -e "${glob}" ]] && continue
         
@@ -134,12 +136,8 @@ install()
     fi
     
     for bashcomp in "$@" ; do
-        # full path given
-        if [[ "${bashcomp}" == */* ]] ; then
-            file=$bashcomp
-        else # if not, use default location
-            file="$BASHCOMP_DIR/$bashcomp"
-        fi
+        file="$BASHCOMP_DIR/$bashcomp"
+        [[ "${bashcomp}" == */* ]] && file=$bashcomp # a path was given
         
         check_file "$file" || return 1
 
