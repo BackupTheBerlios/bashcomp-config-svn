@@ -1,0 +1,24 @@
+AC_INIT(bash-completion-config.in)
+AC_CONFIG_AUX_DIR(config)
+
+PACKAGE="bash-completion-config"
+VERSION="0.1"
+AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
+
+AC_CHECK_PROG(BASH, bash, bash, [AC_MSG_ERROR([bash is required])])
+
+DATADIR=$datadir
+SYSCONFDIR=$sysconfdir
+
+AC_SUBST(PACKAGE)
+AC_SUBST(VERSION)
+AC_SUBST(DATADIR)
+AC_SUBST(SYSCONFDIR)
+
+AC_OUTPUT([
+    Makefile
+    completion
+    bash-completion-config
+    bash-completion-config.1
+], [chmod +x bash-completion-config])
+
