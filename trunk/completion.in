@@ -34,10 +34,10 @@ complete_on()
         uninstall)
             if [ -z "$2" ] ; then
                 COMPREPLY=($(compgen -W "$(complete_installed \
-                    ${HOME}/@INSTALL_DIR@)" -- "${cur}"))
+                    ${HOME}/.bash_completion.d)" -- "${cur}"))
             else
                 COMPREPLY=($(compgen -W "$(complete_installed \
-                @GLOBAL_INSTALL_DIR@)" -- "${cur}"))
+                @SYSCONFDIR@/bash_completion.d)" -- "${cur}"))
             fi
             ;;
     esac
