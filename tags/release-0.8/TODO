@@ -1,0 +1,6 @@
+
+bash-completion-config
+
+- Don't display table if # of installed completions = 0
+  (added 2004-11-14, incomplete, priority low)
+
