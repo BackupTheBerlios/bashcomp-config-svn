@@ -2,7 +2,7 @@ AC_INIT(bash-completion-config.in)
 AC_CONFIG_AUX_DIR(config)
 
 PACKAGE="bash-completion-config"
-VERSION="0.1"
+VERSION="0.2"
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
 
 AC_CHECK_PROG(BASH, bash, bash, [AC_MSG_ERROR([bash is required])])
