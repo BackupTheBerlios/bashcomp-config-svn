@@ -29,7 +29,8 @@ complete_on()
 {
     case "$1" in
         install)
-            COMPREPLY=($(compgen -W "$(complete_avail)" -- "${cur}"))
+            COMPREPLY=($(compgen -o filenames -A file -W "$(complete_avail)" \
+                -- "${cur}"))
             ;;
         uninstall)
             if [ -z "$2" ] ; then
