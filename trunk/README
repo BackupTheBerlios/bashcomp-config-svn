@@ -40,8 +40,11 @@ DATADIR/bash-completion.  Otherwise, it'll use the path that you specify.
 Note that for the changes to take effect however, you will need to add the 
 following to your ~/.bashrc:
 
-[ -d ~/.bash_completion.d ] && \
-{ for i in ~/.bash_completion.d/*; do [ -f $i ] && . $i; done }
+[ -f $SYSCONFDIR/profile.d/bash-completion ] && \
+    source $SYSCONFDIR/profile.d/bash-completion
+
+where $SYSCONFDIR is the directory passed to configure as the 
+--sysconfdir argument.  This will most likely be /etc or /usr/local/etc.
 
 Afterwards, "source" it, and the completion functions that you installed
 should now be available.
