@@ -78,6 +78,7 @@ Options:
                      --uninstall.
   -nc, --nocolor, --nocolour
                      Disable colored output.
+  -q,  --quiet       Only display warnings/errors.
   -l,  --list <all>  Lists currently enabled bash-completions (local
                      and global).  Takes an optional argument, 'all', which if
                      specified shows all completions, not just those installed.
@@ -275,7 +276,7 @@ install()
         mkdir "${GLOBAL_INSTALL_DIR}" || return 1
     fi
     
-    header
+    [[ -z "${QUIET}" ]] && header
     for bashcomp in $@ ; do
         # skip options since they've been taken care of already
         [[ "${bashcomp}" == -* ]] && continue;
@@ -313,7 +314,7 @@ install()
         fi
         
         rv=0
-        ebegin "Installing ${bashcomp##*/}"
+        [[ -z "${QUIET}" ]] && ebegin "Installing ${bashcomp##*/}"
         if [[ -z "${GLOBAL}" ]] ; then
             ln -s "$file" "$INSTALL_DIR" || rv=1
         else
@@ -324,12 +325,13 @@ install()
                 rv=1
             fi
         fi
-        eend $rv
+        [[ -z "${QUIET}" ]] && eend $rv
         [[ $rv -eq 0 ]] && (( nsuccess++ ))
     done
 
     # only show message if !GLOBAL and at least one was installed successfully
-    if [[ -z "${GLOBAL}" && ${nsuccess} -gt 0 ]] ; then
+    if [[ -z "${QUIET}" ]] && [[ -z "${GLOBAL}" ]] && [[ ${nsuccess} -gt 0 ]]
+    then
         echo -ne "\n" \
         "If you haven't already, add the following to your ~/.bashrc:" \
         "$COLOR_TWO\n" \
@@ -338,7 +340,7 @@ install()
         "You must then source your ~/.bashrc for the changes to take effect.\n"
     fi
 
-    echo
+    [[ -z "${QUIET}" ]] && echo
     return $rv
 }
 
@@ -347,7 +349,7 @@ uninstall()
     local bashcomp file
     [[ -z "$1" ]] && blarg $FUNCNAME
 
-    header
+    [[ -z "${QUIET}" ]] && header
     for bashcomp in $@ ; do
         [[ "${bashcomp}" == -* ]] && continue;
 
@@ -360,16 +362,16 @@ uninstall()
         fi
         
         rv=0
-        ebegin "Uninstalling $bashcomp"
+        [[ -z "${QUIET}" ]] && ebegin "Uninstalling $bashcomp"
         if [[ -w "${file%/*}" ]] ; then
             rm "$file" || rv=1
         else
             eerror "You do not have correct permissions to uninstall $bashcomp"
             rv=1
         fi
-        eend $rv
+        [[ -z "${QUIET}" ]] && eend $rv
     done
-    echo
+    [[ -z "${QUIET}" ]] && echo
 
     return $rv
 }
@@ -392,6 +394,8 @@ read_config
 for opt in $@ ; do
     if [[ "${opt}" == '-g' || "${opt}" == '--global' ]] ; then
         GLOBAL=true
+    elif [[ "${opt}" == '-q' || "${opt}" == '--quiet' ]] ; then
+        QUIET=true
     elif [[ "${opt}" == '-d' || "${opt}" == '--debug' ]] ; then
         _DEBUG=true
         set -o verbose
@@ -436,6 +440,10 @@ while true ; do
             continue
             ;;
         -nc|--nocolor|--nocolour)
+            shift
+            continue
+            ;;
+        -q|--quiet)
             shift
             continue
             ;;

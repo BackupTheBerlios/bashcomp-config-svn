@@ -20,6 +20,9 @@ Display version.
 .B "\-nc, \-\-nocolor, \-\-nocolour"
 Disable colored output.
 .TP
+.B "\-q, \-\-quiet"
+Only display warnings/errors. 0 is returned on success, 1 on failure.
+.TP
 .B "\-g, \-\-global"
 Perform specified operation on a system-wide basis.  Must be used in conjunction
 with --install or --uninstall.
