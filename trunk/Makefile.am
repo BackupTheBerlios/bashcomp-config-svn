@@ -39,7 +39,7 @@ dosed = @SED@ -e "s,%BASH%,$(BASH),g" \
 	@if test $@ = $(bin_SCRIPTS); then chmod +x $@; fi
 	
 
-install-data-local: completion
+install-data-local: $(noinst_DATA)
 	$(mkinstalldirs) $(DESTDIR)$(datadir)/bash-completion
 	$(INSTALL_DATA) completion \
 		$(DESTDIR)$(datadir)/bash-completion/bash-completion-config
