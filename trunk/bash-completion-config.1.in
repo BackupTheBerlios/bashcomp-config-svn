@@ -57,6 +57,9 @@ Any of the above variables may also be defined in a rc file, in the following fo
 
 \fB%PACKAGE%\fR will first read %SYSCONFDIR%/bashcomp-configrc, if it exists, then
 $HOME/.bashcomp-configrc, if it exists.
+.SH AUTHORS
+.TP
+Aaron Walker <\fIka0ttic@gentoo.org\fR>
 .SH SEE ALSO
 .TP
 .B bash(1)
