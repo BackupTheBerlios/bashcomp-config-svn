@@ -187,4 +187,4 @@ while true ; do
     esac
 done
 
-# vim: set tw=80 sw=4 et :
+# vim: set ft=sh tw=80 sw=4 et :

@@ -1,0 +1,9 @@
+- Implement list()
+  (added 10/28/04, 10:22, incomplete, priority veryhigh)
+
+- Setup configure to accept --bashcompdir, --installdir, and --globalinstalldir
+  (added 10/28/04, 10:21, incomplete, priority medium)
+
+- Add command-line switches for setting BASHCOMP_DIR, INSTALL_DIR, and GLOBAL_INSTALL_DIR
+  (added 10/28/04, 10:22, incomplete, priority medium)
+
