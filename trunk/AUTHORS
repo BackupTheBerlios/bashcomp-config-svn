@@ -1,1 +1,9 @@
 Aaron Walker <ka0ttic@gentoo.org>
+
+Thanks go to Ciaran McCreesh <ciaranm@gentoo.org> for the original idea for
+this utility.
+
+Thanks go to the following folks for contributions:
+
+    James Rowe <Jay@jnrowe.ukfsn.org> - various fixes for the build process
+    (configure.in, Makefile.am, and others).
