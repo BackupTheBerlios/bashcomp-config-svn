@@ -39,10 +39,13 @@ Usage: $PACKAGE [options] <name1> <name2>
 Add/remove bash-completion function(s) to your environment
 
 Options:
-  -g, --global      Install bash-completion system-wide (must be root)
-  -l, --list        List currently enabled bash-completions
-  -i, --install     Install bash-completion
-  -u, --uninstall   Uninstall bash-completion
+  -g, --global      Perform operation system-wide (must be root).
+                    Must be used in conjunction with --install or
+                    --uninstall.
+  -l, --list        Lists currently enabled bash-completions (local
+                    and global).
+  -i, --install     Install specified bash-completion(s).
+  -u, --uninstall   Uninstall specified bash-completion(s).
 END
 }
 
@@ -103,10 +106,12 @@ install()
         eend $?
     done
 
-    echo
-    echo "If you haven't already, add the following to your ~/.bashrc:"
-    echo "[ -d ~/.bash_completion.d ] && source ~/.bash_completion.d/*"
-    echo "You must then source your ~/.bashrc for the changes to take effect."
+    if [ -z "${GLOBAL}" ] ; then
+        echo
+        echo "If you haven't already, add the following to your ~/.bashrc:"
+        echo "[ -d ~/.bash_completion.d ] && source ~/.bash_completion.d/*"
+        echo "You must then source your ~/.bashrc for the changes to take effect."
+    fi
 }
 
 uninstall()
