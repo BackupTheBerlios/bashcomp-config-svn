@@ -46,7 +46,7 @@ complete_on()
 
 _@PACKAGE@()
 {
-    local cur prev opts
+    local cur prev opts i a=0
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -60,7 +60,17 @@ _@PACKAGE@()
 
     case "${prev}" in
         -g|--global)
-            COMPREPLY=($(compgen -W "-i --install -u --uninstall" -- "${cur}"))
+            for i in ${COMP_WORDS[@]} ; do
+                [[ "${i}" == "-i" || "${i}" == "--install" ||
+                   "${i}" == "-u" || "${i}" == "--uninstall" ]] && a=1
+            done
+            
+            if [ ${a} -eq 1 ] ; then
+                action=install
+                complete_on "${action}"
+            else
+                COMPREPLY=($(compgen -W "-i --install -u --uninstall" -- "${cur}"))
+            fi
             ;;
         -i|--install)
             action=install

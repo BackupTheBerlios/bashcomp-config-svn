@@ -96,20 +96,25 @@ list()
 
     header
     
-    printf "%-${maxlen}s| Local  Global |\n"
-    for ((n = 1 ; n <= (maxlen + 17) ; n++)) ; do
-        echo -n -
-    done
+    local label="| Local  Global |"
+    local llen="${#label}"
+
+    printf "%-${maxlen}s$label\n"
+    for ((n = 1 ; n <= (maxlen + llen) ; n++)) ; do echo -n '-' ; done
     echo
     
     for bashcomp in $BASHCOMP_DIR/* ; do
         bashcomp="${bashcomp##*/}"
-        local i=3 len="${#bashcomp}"
+        local i=3 exists=0 len="${#bashcomp}"
         local loc="${INSTALL_DIR}/${bashcomp}"
         local glob="${GLOBAL_INSTALL_DIR}/${bashcomp}"
         
-        # skip non-installed
-        [[ ! -e "${loc}" && ! -e "${glob}" ]] && continue
+        [[ -e "${loc}" || -e "${glob}" ]] && exists=1
+        
+        # skip non-installed unless $1 == "all"
+        if [[ -z "$1" || "$1" != all ]] ; then
+            [ ${exists} -eq 0 ] && continue
+        fi
         
         echo -ne "${COLOR_ONE}${bashcomp}${NO_COLOR}"        
         for ((n = 1 ; n <= (maxlen - len) ; n++)) ; do echo -n ' ' ; done
@@ -120,8 +125,15 @@ list()
         
         [ -e "${loc}" ] && echo -ne "${COLOR_TWO}*${NO_COLOR}"
         [ -e "${glob}" ] && echo -ne "${COLOR_THREE}*${NO_COLOR}"
-        echo
+
+        # if it doesnt exist, a '*' doesnt get printed, so make up for it
+        [ ${exists} -eq 0 ] && ((i--))
+        
+        for ((n = 1 ; n < (llen - (i + 2)) ; n++)) ; do echo -n ' ' ; done
+        echo '|'
     done
+
+    for ((n = 1 ; n <= (maxlen + llen) ; n++)) ; do echo -n '-' ; done
     echo
 }
 
@@ -140,6 +152,11 @@ install()
     
     header
     for bashcomp in "$@" ; do
+        if [[ "${bashcomp}" == "-g" || "${bashcomp}" == "--global" ]] ; then
+            GLOBAL=true
+            continue;
+        fi
+        
         file="$BASHCOMP_DIR/${bashcomp##*/}"
         [[ "${bashcomp}" == */* ]] && file=$bashcomp # a path was given
         
@@ -192,6 +209,12 @@ uninstall()
 
     header
     for bashcomp in "$@" ; do
+        # in case --global is passed after --uninstall
+        if [[ "${bashcomp}" == "-g" || "${bashcomp}" == "--global" ]] ; then
+            GLOBAL=true
+            continue
+        fi
+
         file="$INSTALL_DIR/$bashcomp"
         [ -n "${GLOBAL}" ] && file="$GLOBAL_INSTALL_DIR/$bashcomp"
         
@@ -228,7 +251,8 @@ set -- "$@"
 while true ; do
     case "$1" in
 	-l|--list)
-            list
+            shift
+            list "$@"
             exit $?
             ;;
 	-i|--install)
