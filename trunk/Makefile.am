@@ -40,6 +40,11 @@ dosed = @SED@ -e "s,%BASH%,$(BASH),g" \
 	@$(dosed) $< > $@
 	@if test $@ = $(bin_SCRIPTS); then chmod +x $@; fi
 
+# automatically add month & year to manual page(s) when running 'make dist'
+dist-hook:
+	@SED@ -i "s/\"[a-zA-Z]\{3\} [0-9]\{4\}\"/\"`date '+%b %Y'`\"/" \
+		$(man_MANS:%=%.in)
+		
 install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/profile.d
 	$(INSTALL) profile.d \
