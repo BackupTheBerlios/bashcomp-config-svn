@@ -65,7 +65,7 @@ NO_COLOR="\033[00m"
 
 usage()
 {
-cat << END
+cat << EOF
 Usage: $PACKAGE [ options ] [ <bashcomp1> <bashcomp2> ... ]
 Add/remove bash-completion function(s) to your environment
 
@@ -86,7 +86,9 @@ Options:
 You may specify an arbitrary number of arguments to --install and --uninstall.
 The arguments may be a path, or just a name, in which case it is assumed to
 exist in $BASHCOMP_DIR.
-END
+
+Read the $PACKAGE(1) manual page for more detailed information.
+EOF
 }
 
 header()
@@ -243,9 +245,9 @@ list()
             [ -e "${glob}" ] && echo -ne "${COLOR_THREE}*${NO_COLOR}"
 
             # if it doesnt exist, a '*' doesnt get printed, so make up for it
-            [ ${installed} -eq 0 ] && ((i--))
+            [ ${installed} -eq 0 ] && (( i-- ))
             # or they both exist, so compensate
-            [[ -e "${loc}" && -e "${glob}" ]] && i=$((i + 8))
+            [[ -e "${loc}" && -e "${glob}" ]] && i=$(( i + 8 ))
 
             # right |
             for ((n = 1 ; n < (llen - (i + 2)) ; n++)) ; do echo -n ' ' ; done
@@ -261,7 +263,7 @@ list()
 
 install()
 {
-    local bashcomp file
+    local bashcomp file nsuccess=0
     [ -z "$1" ] && blarg $FUNCNAME
 
     if [[ -z "${GLOBAL}" && ! -d "${INSTALL_DIR}" ]] ; then
@@ -274,6 +276,7 @@ install()
     
     header
     for bashcomp in "$@" ; do
+        # skip options since they've been taken care of already
         [[ "${bashcomp}" == -* ]] && continue;
 
         # what form is the argument in?
@@ -321,16 +324,17 @@ install()
             fi
         fi
         eend $rv
+        [ $rv -eq 0 ] && (( nsuccess++ ))
     done
 
-    if [ -z "${GLOBAL}" ] ; then
-        echo
-        echo "If you haven't already, add the following to your ~/.bashrc:"
-        echo -ne "$COLOR_TWO"
-        echo '[ -d ~/.bash_completion.d ] && \'
-        echo -n '{ for i in ~/.bash_completion.d/*; do [ -f $i ] && . $i; done }'
-        echo -e "$NO_COLOR"
-        echo "You must then source your ~/.bashrc for the changes to take effect."
+    # only show message if !GLOBAL and at least one was installed successfully
+    if [[ -z "${GLOBAL}" && ${nsuccess} -gt 0 ]] ; then
+        echo -ne "\n" \
+        "If you haven't already, add the following to your ~/.bashrc:" \
+        "$COLOR_TWO\n" \
+        "[ -f /etc/profile.d/bash-completion ] && . /etc/profile.d/bash-completion" \
+        "$NO_COLOR\n" \
+        "You must then source your ~/.bashrc for the changes to take effect.\n"
     fi
 
     echo
