@@ -88,6 +88,20 @@ maxfnlen()
     echo $len
 }
 
+set_nocolor()
+{
+    # colors from functions.sh
+    GOOD=
+    BAD=
+    WARN=
+    BRACKET=
+    HILITE=
+    # locally-defined colors
+    COLOR_ONE=
+    COLOR_TWO=
+    COLOR_THREE=
+}
+
 ###############################################################################
 # action functions
 ###############################################################################
@@ -153,10 +167,11 @@ install()
     
     header
     for bashcomp in "$@" ; do
-        if [[ "${bashcomp}" == "-g" || "${bashcomp}" == "--global" ]] ; then
-            GLOBAL=true
-            continue;
-        fi
+        [[ "${bashcomp}" == -* ]] && continue;
+        #if [[ "${bashcomp}" == "-g" || "${bashcomp}" == "--global" ]] ; then
+        #    GLOBAL=true
+        #    continue;
+        #fi
         
         file="$BASHCOMP_DIR/${bashcomp##*/}"
         [[ "${bashcomp}" == */* ]] && file=$bashcomp # a path was given
@@ -210,11 +225,12 @@ uninstall()
 
     header
     for bashcomp in "$@" ; do
+        [[ "${bashcomp}" == -* ]] && continue;
         # in case --global is passed after --uninstall
-        if [[ "${bashcomp}" == "-g" || "${bashcomp}" == "--global" ]] ; then
-            GLOBAL=true
-            continue
-        fi
+        #if [[ "${bashcomp}" == "-g" || "${bashcomp}" == "--global" ]] ; then
+        #    GLOBAL=true
+        #    continue
+        #fi
 
         file="$INSTALL_DIR/$bashcomp"
         [ -n "${GLOBAL}" ] && file="$GLOBAL_INSTALL_DIR/$bashcomp"
@@ -248,6 +264,17 @@ if [ "$#" -eq 0 ] ; then
     exit 1
 fi
 
+# perform toggle operations first
+for opt in "$@" ; do
+    if [[ "${opt}" == '-g' || "${opt}" == '--global' ]] ; then
+        GLOBAL=true
+    elif [[ "${opt}" == '-nc' ]] || [[ "${opt}" == '--nocolor' ]] ||
+         [[ "${opt}" == '--nocolour' ]]
+    then
+        set_nocolor
+    fi
+done
+
 set -- "$@"
 while true ; do
     case "$1" in
@@ -267,21 +294,12 @@ while true ; do
             exit $?
 	    ;;
         -g|--global)
-            GLOBAL=yes
             shift
+            continue
             ;;
         -nc|--nocolor|--nocolour)
-            # colors from functions.sh
-            GOOD=
-            BAD=
-            WARN=
-            BRACKET=
-            HILITE=
-            # locally-defined colors
-            COLOR_ONE=
-            COLOR_TWO=
-            COLOR_THREE=
             shift
+            continue
             ;;
 	-h|--help)
 	    usage
