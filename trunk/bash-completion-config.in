@@ -5,15 +5,15 @@
 #
 # Author: Aaron Walker <ka0ttic@gentoo.org>
 
-[ -z "${ROOT}" ] && ROOT=""
-if [ ! -e "${ROOT}%FUNCTIONS_SH%" ] ; then
+[[ -z "${ROOT}" ]] && ROOT=""
+if [[ ! -e "${ROOT}%FUNCTIONS_SH%" ]] ; then
     echo "${ROOT}%FUNCTIONS_SH% does not exist!"
     exit 1
 fi
 
 source "${ROOT}%FUNCTIONS_SH%" || exit 1
 
-if [ -z "${HOME}" ] ; then 
+if [[ -z "${HOME}" ]] ; then 
     eerror "HOME environment variable is not set!"
     exit 1
 fi
@@ -26,7 +26,7 @@ PACKAGE="%PACKAGE%"
 VERSION="%VERSION%"
 
 # directory in which contributed bash completions are kept
-if [ -z "${BASHCOMP_DIR}" ] ; then
+if [[ -z "${BASHCOMP_DIR}" ]] ; then
     BASHCOMP_DIR="$ROOT%DATADIR%/bash-completion"
 # already set in environment; save it, as it will get overridden if set in a
 # config file
@@ -35,7 +35,7 @@ else
 fi
 
 # directory in which symlinks to completions will be locally installed
-if [ -z "${INSTALL_DIR}" ] ; then
+if [[ -z "${INSTALL_DIR}" ]] ; then
     INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
 # save it
 else
@@ -45,9 +45,9 @@ fi
 # if the bash-completion package has been installed (and sourced), then
 # the variable, BASH_COMPLETION_DIR should be avail and contain the path
 # to the global install dir
-if [ -n "${BASH_COMPLETION_DIR}" ] ; then
+if [[ -n "${BASH_COMPLETION_DIR}" ]] ; then
     GLOBAL_INSTALL_DIR="$BASH_COMPLETION_DIR"
-elif [ -z "${GLOBAL_INSTALL_DIR}" ] ; then
+elif [[ -z "${GLOBAL_INSTALL_DIR}" ]] ; then
     GLOBAL_INSTALL_DIR="$ROOT%SYSCONFDIR%/bash_completion.d"
 # save it
 else
@@ -112,14 +112,14 @@ read_config()
     local localrc="$ROOT/$HOME/.bashcomp-configrc"
     local globalrc="$ROOT%SYSCONFDIR%/bashcomp-configrc"
 
-    [ -f "${globalrc}" ] && source $globalrc
-    [ -f "${localrc}" ] && source $localrc
+    [[ -f "${globalrc}" ]] && source $globalrc
+    [[ -f "${localrc}" ]] && source $localrc
 
     # if the *_SAVE variables are defined, their respective counterpart should
     # be reset, as the environment should override the config
-    [ -n "${BASHCOMP_DIR_SAVE}" ] && BASHCOMP_DIR="$BASHCOMP_DIR_SAVE"
-    [ -n "${INSTALL_DIR_SAVE}" ] && INSTALL_DIR="$INSTALL_DIR_SAVE"
-    [ -n "${GLOBAL_INSTALL_DIR_SAVE}" ] && \
+    [[ -n "${BASHCOMP_DIR_SAVE}" ]] && BASHCOMP_DIR="$BASHCOMP_DIR_SAVE"
+    [[ -n "${INSTALL_DIR_SAVE}" ]] && INSTALL_DIR="$INSTALL_DIR_SAVE"
+    [[ -n "${GLOBAL_INSTALL_DIR_SAVE}" ]] && \
         GLOBAL_INSTALL_DIR="$GLOBAL_INSTALL_DIR_SAVE"
 }
 
@@ -128,7 +128,7 @@ maxfnlen()
 {
     local len=0 bashcomp
     for bashcomp in $1/* ; do
-        [ ! -e "${bashcomp}" ] && continue
+        [[ ! -e "${bashcomp}" ]] && continue
         bashcomp="${bashcomp##*/}"
         [[ ${#bashcomp} -gt $len ]] && len=${#bashcomp}
     done
@@ -144,14 +144,14 @@ getdirs()
     
     # for each install dir
     for dir in $@ ; do
-        [ ! -d "${dir}" ] && continue
+        [[ ! -d "${dir}" ]] && continue
         
         # for each completion
         for file in $dir/* ; do
-            [ ! -e "${file}" ] && continue
+            [[ ! -e "${file}" ]] && continue
             
             # resolve real path 
-            [ -L "${file}" ] && file=$(readlink -nf $file)
+            [[ -L "${file}" ]] && file=$(readlink -nf $file)
 
             # we only want the directory
             file="${file%/*}"
@@ -166,7 +166,7 @@ getdirs()
             done
 
             # skip it?
-            [ ${a} -eq 1 ] && { a=0 && continue; }
+            [[ ${a} -eq 1 ]] && { a=0 && continue; }
 
             dirs[((i++))]="$file"
         done
@@ -216,7 +216,7 @@ list()
             
             # skip non-installed unless $1 == "all"
             if [[ -z "$1" || "$1" != all ]] ; then
-                [ ${installed} -eq 0 ] && continue
+                [[ ${installed} -eq 0 ]] && continue
             fi
 
             # show only the one actually installed...
@@ -226,7 +226,7 @@ list()
             for x in ${loc} ${glob} ; do
                 [[ -L "${x}" && "$(readlink -nf ${x})" != "${bashcomp}" ]] && a=1
             done
-            [ ${a} -eq 1 ] && { a=0 && continue; }
+            [[ ${a} -eq 1 ]] && { a=0 && continue; }
         
             # two thumbs up ; let's start displaying...
 
@@ -241,12 +241,12 @@ list()
             for ((n = 1 ; n <= i ; n++)) ; do echo -n ' ' ; done
         
             # * if it's installed
-            [ -e "${loc}" ] && echo -ne "${COLOR_TWO}*${NO_COLOR}"
+            [[ -e "${loc}" ]] && echo -ne "${COLOR_TWO}*${NO_COLOR}"
             [[ -e "${loc}" && -e "${glob}" ]] && echo -n '       '
-            [ -e "${glob}" ] && echo -ne "${COLOR_THREE}*${NO_COLOR}"
+            [[ -e "${glob}" ]] && echo -ne "${COLOR_THREE}*${NO_COLOR}"
 
             # if it doesnt exist, a '*' doesnt get printed, so make up for it
-            [ ${installed} -eq 0 ] && (( i-- ))
+            [[ ${installed} -eq 0 ]] && (( i-- ))
             # or they both exist, so compensate
             [[ -e "${loc}" && -e "${glob}" ]] && i=$(( i + 8 ))
 
@@ -265,7 +265,7 @@ list()
 install()
 {
     local bashcomp file nsuccess=0
-    [ -z "$1" ] && blarg $FUNCNAME
+    [[ -z "$1" ]] && blarg $FUNCNAME
 
     if [[ -z "${GLOBAL}" && ! -d "${INSTALL_DIR}" ]] ; then
         mkdir "${INSTALL_DIR}" || return 1
@@ -290,7 +290,7 @@ install()
                 
             *)      # just the name
                 # CWD
-                if [ -f "${bashcomp}" ] ; then
+                if [[ -f "${bashcomp}" ]] ; then
                     file="$PWD/$bashcomp"
                 # assume BASHCOMP_DIR
                 else
@@ -299,7 +299,7 @@ install()
                 ;;
         esac
                 
-        if [ ! -e "${file}" ] ; then
+        if [[ ! -e "${file}" ]] ; then
             ewarn "${file##*/} doesn't seem to exist"
             continue
         fi
@@ -314,10 +314,10 @@ install()
         
         rv=0
         ebegin "Installing ${bashcomp##*/}"
-        if [ -z "${GLOBAL}" ] ; then
+        if [[ -z "${GLOBAL}" ]] ; then
             ln -s "$file" "$INSTALL_DIR" || rv=1
         else
-            if [ -w "${GLOBAL_INSTALL_DIR}" ] ; then
+            if [[ -w "${GLOBAL_INSTALL_DIR}" ]] ; then
                 ln -s "$file" "$GLOBAL_INSTALL_DIR" || rv=1
             else
                 eerror "You do not have correct permissions to install $bashcomp"
@@ -325,7 +325,7 @@ install()
             fi
         fi
         eend $rv
-        [ $rv -eq 0 ] && (( nsuccess++ ))
+        [[ $rv -eq 0 ]] && (( nsuccess++ ))
     done
 
     # only show message if !GLOBAL and at least one was installed successfully
@@ -345,23 +345,23 @@ install()
 uninstall()
 {
     local bashcomp file
-    [ -z "$1" ] && blarg $FUNCNAME
+    [[ -z "$1" ]] && blarg $FUNCNAME
 
     header
     for bashcomp in $@ ; do
         [[ "${bashcomp}" == -* ]] && continue;
 
         file="$INSTALL_DIR/$bashcomp"
-        [ -n "${GLOBAL}" ] && file="$GLOBAL_INSTALL_DIR/$bashcomp"
+        [[ -n "${GLOBAL}" ]] && file="$GLOBAL_INSTALL_DIR/$bashcomp"
 
-        if [ ! -e "${file}" ] && [ ! -L "${file}" ] ; then
+        if [[ ! -e "${file}" ]] && [[ ! -L "${file}" ]] ; then
             ewarn "$bashcomp is not installed"
             continue
         fi
         
         rv=0
         ebegin "Uninstalling $bashcomp"
-        if [ -w "${file%/*}" ] ; then
+        if [[ -w "${file%/*}" ]] ; then
             rm "$file" || rv=1
         else
             eerror "You do not have correct permissions to uninstall $bashcomp"
@@ -380,7 +380,7 @@ uninstall()
 
 shopt -s extglob
 
-if [ $# -eq 0 ] ; then
+if [[ $# -eq 0 ]] ; then
     usage
     exit 1
 fi
@@ -403,7 +403,7 @@ for opt in $@ ; do
     fi
 done
 
-if [ ! -d "${BASHCOMP_DIR}" ] ; then
+if [[ ! -d "${BASHCOMP_DIR}" ]] ; then
     eerror "BASHCOMP_DIR is set to \"$BASHCOMP_DIR\" but does not exist."
     eerror "This should be set to a directory that contains contributed completions."
     exit 1
