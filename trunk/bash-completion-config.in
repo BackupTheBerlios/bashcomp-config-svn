@@ -378,10 +378,7 @@ uninstall()
 # main program                                                                #
 ###############################################################################
 
-shopts=$-
 shopt -s extglob
-
-trap "set +o verbose +o xtrace ; set -${shopts}" EXIT
 
 if [ "$#" -eq 0 ] ; then
     usage
