@@ -332,7 +332,7 @@ install()
         echo -ne "\n" \
         "If you haven't already, add the following to your ~/.bashrc:" \
         "$COLOR_TWO\n" \
-        "[ -f /etc/profile.d/bash-completion ] && . /etc/profile.d/bash-completion" \
+        "[ -f %SYSCONFDIR%/profile.d/bash-completion ] && . %SYSCONFDIR%/profile.d/bash-completion" \
         "$NO_COLOR\n" \
         "You must then source your ~/.bashrc for the changes to take effect.\n"
     fi
