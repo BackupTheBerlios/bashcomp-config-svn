@@ -50,8 +50,9 @@ Options:
                     --uninstall.
   -h, --help        Display this help message.
   -V, --version     Display version information.
-  -l, --list        Lists currently enabled bash-completions (local
-                    and global).
+  -l, --list <all>  Lists currently enabled bash-completions (local
+                    and global).  Takes an optional argument, 'all', which if
+                    specified shows all completions, not just those installed.
   -i, --install     Install specified bash-completion(s).
   -u, --uninstall   Uninstall specified bash-completion(s).
 

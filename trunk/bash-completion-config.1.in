@@ -25,7 +25,9 @@ Display usage information.
 Display version.
 .TP
 .B "\-l, \-\-list"
-List currently installed completions (local and global).
+List currently installed completions (local and global).  This option takes an
+optional argument, 'all', which if specified lists all completions, not just those
+installed.
 .TP
 .B "\-i, \-\-install"
 Install specified completion(s).  Takes an arbitrary number of completions to
