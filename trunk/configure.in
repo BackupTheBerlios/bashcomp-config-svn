@@ -1,6 +1,6 @@
 # $Id$
 
-AC_INIT(bash-completion-config, 0.6, ka0ttic@gentoo.org, bashcomp-config)
+AC_INIT(bash-completion-config, 0.7, ka0ttic@gentoo.org, bashcomp-config)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(bash-completion-config.in)
 AC_CONFIG_AUX_DIR(config)
