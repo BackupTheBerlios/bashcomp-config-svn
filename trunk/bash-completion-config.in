@@ -352,8 +352,8 @@ uninstall()
 
         file="$INSTALL_DIR/$bashcomp"
         [ -n "${GLOBAL}" ] && file="$GLOBAL_INSTALL_DIR/$bashcomp"
-        
-        if [ ! -e "${file}" ] ; then
+
+        if [ ! -e "${file}" ] && [ ! -L "${file}" ] ; then
             ewarn "$bashcomp is not installed"
             continue
         fi
