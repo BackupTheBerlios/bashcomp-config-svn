@@ -1,0 +1,46 @@
+Sun Nov 28 12:09:03 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.7
+    Renamed completion function to use POSIX-sh valid identifier.  Couple
+    other minor bug fixes as well.
+
+Sun Nov 14 15:02:05 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.6
+    Mainly fixes in Makefile install targets and a few other minor fixes.
+    We're getting pretty close to being considered stable, and I'll probably
+    be making the transition from 0.9 => 1.0 rather than 0.10, barring any
+    extreme issues.
+
+Wed Nov 10 07:12:43 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.5
+    As far as user-visible changes, this is purely a bugfix release.
+    Many thanks to James Rowe <Jay@jnrowe.ukfsn.org> for a couple fixes,
+    plus a better Makefile.am.
+
+Wed Nov 03 09:15:04 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.4
+    Added minimal functions.sh for non-Gentoo platforms.  Added rc file
+    support.  Lots of misc bug fixes, including one in --list where it
+    would not list any completions installed by specifying a path.
+
+Mon Nov 01 11:14:13 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.3
+    Improved parsing of toggle options; doesn't matter if a toggle option
+    is specified after an action option.  Added a no color switch (-nc,
+    --nocolor).  Also, completely overhauled build process; using make to
+    build stuff like we should.  make install now works.
+
+Sat Oct 30 09:59:49 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.2  
+    Improved --list action.  Better output and now accepts an optional 'all'
+    argument.  Fixed bug where --global after --(un)install would attempt to
+    install '--global' literally.
+
+Fri Oct 29 17:37:24 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.1.
