@@ -9,7 +9,7 @@
 # echo all completions in BASHCOMP_DIR
 complete_avail()
 {
-    local bashcomp BASHCOMP_DIR="@BASHCOMP_DIR@"
+    local bashcomp BASHCOMP_DIR="@DATADIR@/bash-completion"
     for bashcomp in $BASHCOMP_DIR/* ; do
         echo -n "${bashcomp##*/} "
     done
