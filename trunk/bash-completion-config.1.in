@@ -49,6 +49,14 @@ Location of local installation directory.  Defaults to $HOME/.bash_completion.d.
 .TP
 .B GLOBAL_INSTALL_DIR
 Location of global installation directory.  Defaults to %SYSCONFDIR%/bash_completion.d.
+.SH CONFIGURATION
+Any of the above variables may also be defined in a rc file, in the following format:
+.br
+
+.B VARIABLE=VALUE
+
+\fB%PACKAGE%\fR will first read %SYSCONFDIR%/bashcomp-configrc, if it exists, then
+$HOME/.bashcomp-configrc, if it exists.
 .SH SEE ALSO
 .TP
 .B bash(1)
