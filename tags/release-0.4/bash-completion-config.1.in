@@ -1,0 +1,64 @@
+.\" $Id$
+.TH "%PACKAGE%" 1 "Nov 2004" "%VERSION%"
+.SH NAME
+\fB%PACKAGE%\fR \- Add/remove bash-completion functions to your environment.
+.SH SYNOPSIS
+.B "%PACKAGE% "
+[ \fIoptions\fR ] <\fIbashcomp1\fR> <\fIbashcomp2\fR> ...  ]
+.SH DESCRIPTION
+\fB%PACKAGE%\fR attempts to ease installation and configuration of contributed
+(ie not include in bash-completion proper) bash completions and allows for both
+per-user and system-wide (see --global) installations.
+.SH OPTIONS
+.TP
+.B "\-h, \-\-help"
+Display usage information.
+.TP
+.B "\-V, \-\-version"
+Display version.
+.TP
+.B "\-nc, \-\-nocolor, \-\-nocolour"
+Disable colored output.
+.TP
+.B "\-g, \-\-global"
+Perform specified operation on a system-wide basis.  Must be used in conjunction
+with --install or --uninstall.
+.TP
+.B "\-l, \-\-list"
+List currently installed completions (local and global).  This option takes an
+optional argument, 'all', which if specified lists all completions, not just those
+installed.
+.TP
+.B "\-i, \-\-install"
+Install specified completion(s).  Takes an arbitrary number of completions to
+install.  Each argument may be a path, or just a name, in which case it will
+be assumed to exist in %DATADIR%/bash-completion.  Installs locally, unless
+--global is previously specified.
+.TP
+.B "\-u, \-\-uninstall"
+Uninstall specified completion(s).  Takes an arbitrary number of completions
+to uninstall.  Each argument should be just the name of the completion.  
+Uninstalls locally, unless --global is previously specified.
+.SH ENVIRONMENT
+.TP
+.B BASHCOMP_DIR
+Location of contributed bash completions.  Defaults to %DATADIR%/bash-completion.
+.TP
+.B INSTALL_DIR
+Location of local installation directory.  Defaults to $HOME/.bash_completion.d.
+.TP
+.B GLOBAL_INSTALL_DIR
+Location of global installation directory.  Defaults to %SYSCONFDIR%/bash_completion.d.
+.SH CONFIGURATION
+Any of the above variables may also be defined in a rc file, in the following format:
+.br
+
+.B VARIABLE=VALUE
+
+\fB%PACKAGE%\fR will first read %SYSCONFDIR%/bashcomp-configrc, if it exists, then
+$HOME/.bashcomp-configrc, if it exists.
+.SH SEE ALSO
+.TP
+.B bash(1)
+.SH NOTES
+Please report any bugs to http://bugs.gentoo.org/.
