@@ -38,7 +38,10 @@ dosed = @SED@ -e "s,%BASH%,$(BASH),g" \
 %: %.in
 	@echo " * building $@"
 	@$(dosed) $< > $@
-	@if test $@ = $(bin_SCRIPTS); then chmod +x $@; fi
+	@if test $@ = $(bin_SCRIPTS); then \
+		$(BASH) -n $@; \
+		chmod +x $@; \
+	fi
 
 # automatically add month & year to manual page(s) when running 'make dist'
 dist-hook:
