@@ -125,29 +125,45 @@ install()
     local bashcomp file
     [ -z "$1" ] && blarg $FUNCNAME
 
-    if [ ! -d "$INSTALL_DIR" ] ; then
-        mkdir "$INSTALL_DIR" || return 1
+    if [ ! -d "${INSTALL_DIR}" ] ; then
+        mkdir "${INSTALL_DIR}" || return 1
+    fi
+
+    if [ -n "${GLOBAL}" -a ! -d "${GLOBAL_INSTALL_DIR}" ] ; then
+        mkdir "${GLOBAL_INSTALL_DIR}" || return 1
     fi
     
     for bashcomp in "$@" ; do
-        file="$BASHCOMP_DIR/$bashcomp"
+        # full path given
+        if [[ "${bashcomp}" == */* ]] ; then
+            file=$bashcomp
+        else # if not, use default location
+            file="$BASHCOMP_DIR/$bashcomp"
+        fi
+        
         check_file "$file" || return 1
 
         # already installed
         if [ -n "${GLOBAL}" -a -e "${GLOBAL_INSTALL_DIR}/${bashcomp}" ] ||
            [ -z "${GLOBAL}" -a -e "${INSTALL_DIR}/${bashcomp}" ]
         then
-            ewarn "$bashcomp is already installed"
+            ewarn "${bashcomp##*/} is already installed"
             continue
         fi
 
-        ebegin "Installing $bashcomp"
+        local rv=0
+        ebegin "Installing ${bashcomp##*/}"
         if [ -z "${GLOBAL}" ] ; then
-            ln -s "$file" "$INSTALL_DIR"
+            ln -s "$file" "$INSTALL_DIR" || rv=1
         else
-            ln -s "$file" "$GLOBAL_INSTALL_DIR"
+            if [ -w "${GLOBAL_INSTALL_DIR}" ] ; then
+                ln -s "$file" "$GLOBAL_INSTALL_DIR" || rv=1
+            else
+                eerror "You don't have the correct permissions to use --global"
+                rv=1
+            fi
         fi
-        eend $?
+        eend $rv
     done
 
     if [ -z "${GLOBAL}" ] ; then
@@ -166,20 +182,15 @@ uninstall()
 
     for bashcomp in "$@" ; do
         file="$INSTALL_DIR/$bashcomp"
+        [ -n "${GLOBAL}" ] && file="$GLOBAL_INSTALL_DIR/$bashcomp"
         
-        if [ -n "${GLOBAL}" -a ! -e "${GLOBAL_INSTALL_DIR}/${bashcomp}" ] ||
-           [ -z "${GLOBAL}" -a ! -e "${file}" ]
-        then
+        if [ ! -e "${file}" ] ; then
             ewarn "$bashcomp is not installed"
             continue
         fi
         
         ebegin "Uninstalling $bashcomp"
-        if [ -z "${GLOBAL}" ] ; then
-            rm "$file"
-        else
-            rm "$GLOBAL_INSTALL_DIR/$bashcomp"
-        fi
+        rm "$file"
         eend $?
     done
 }
