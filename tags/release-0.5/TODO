@@ -1,0 +1,8 @@
+[bash-completion-config] 
+created by: ka0ttic on: 11/03/04
+
+[note] Don't display table if # of installed completions = 0
+created by: ka0ttic on: 11/03/04
+
+[note] Handle symlinks as ../blah instead of the abs path
+created by: ka0ttic on: 11/03/04
