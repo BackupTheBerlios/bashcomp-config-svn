@@ -1,0 +1,30 @@
+$Id$
+
+README for bash-completion-config
+A utility to easily add/remove bash completions to your environment.
+
+bash-completion-config attempts to ease installation of contributed
+bash completion scripts, and allows for both per-user and system-wide
+installations.
+
+To install, run:
+
+    ./configure --sysconfdir=DIR1 --datadir=DIR2
+
+where DIR# is the respective location.  These two directories *need*
+to be set.
+
+And that's it!  Running configure should've generated the script, a
+manual page, and completion functions for bash-completion-config itself.
+Install the completion functions (the file name 'completion') into
+$datadir/bash-completion as bash-completion-config.
+
+You can use bash-completion-config to install its own completion,
+(as root) run:
+
+    bash-completion-config -g -i bash-completion-config
+
+If you installed the completion file elsewhere, you'll need to use
+the full path to it.
+
+WWW: http://developer.berlios.de/projects/bashcomp-config

@@ -1,0 +1,264 @@
+#!@BASH@
+# Copyright 1999-2004 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Id$
+#
+# Author: Aaron Walker <ka0ttic@gentoo.org>
+
+[ -z "${ROOT}" ] && ROOT=""
+if ! source $ROOT/sbin/functions.sh ; then
+    echo "Failed to source /sbin/functions.sh"
+    exit 1
+fi
+
+if [ -z "${HOME}" ] ; then 
+    eerror "HOME environment variable is not set!"
+    exit 1
+fi
+
+###############################################################################
+# variables 
+###############################################################################
+
+PACKAGE="@PACKAGE@"
+VERSION="@VERSION@"
+
+# allow user to easily override the defaults
+[ -z "${BASHCOMP_DIR}" ] && BASHCOMP_DIR="$ROOT@DATADIR@/bash-completion"
+[ -z "${INSTALL_DIR}" ] && INSTALL_DIR="$ROOT/$HOME/.bash_completion.d"
+[ -z "${GLOBAL_INSTALL_DIR}" ] && \
+    GLOBAL_INSTALL_DIR="$ROOT@SYSCONFDIR@/bash_completion.d"
+
+COLOR_ONE="\033[01;34m"   # blue
+COLOR_TWO="\033[01;32m"   # green
+COLOR_THREE="\033[00;31m" # red
+NO_COLOR="\033[00m"
+
+###############################################################################
+# misc functions
+###############################################################################
+
+usage()
+{
+cat << END
+Usage: $PACKAGE [options] <bashcomp1> <bashcomp2>
+Add/remove bash-completion function(s) to your environment
+
+Options:
+  -g, --global      Perform operation system-wide (must be root).
+                    Must be used in conjunction with --install or
+                    --uninstall.
+  -h, --help        Display this help message.
+  -V, --version     Display version information.
+  -l, --list        Lists currently enabled bash-completions (local
+                    and global).
+  -i, --install     Install specified bash-completion(s).
+  -u, --uninstall   Uninstall specified bash-completion(s).
+
+You may specify an arbitrary number of arguments to --install and --uninstall.
+The arguments may be a path, or just a name, in which case it is assumed to
+exist in $BASHCOMP_DIR.
+END
+}
+
+header()
+{
+    echo -e "${COLOR_ONE}${PACKAGE}-${VERSION}${NO_COLOR}\n"
+}
+
+# bleh arg missing
+blarg()
+{
+    echo -e "$1 requires at least one argument!\n"
+    usage
+    exit 1
+}
+
+# get max filename length in dir $1
+maxfnlen()
+{
+    local len=0 bashcomp
+    for bashcomp in $1/* ; do
+        bashcomp="${bashcomp##*/}"
+        [[ ${#bashcomp} -gt $len ]] && len=${#bashcomp}
+    done
+    echo $len
+}
+
+###############################################################################
+# action functions
+###############################################################################
+
+list()
+{
+    local n 
+    local maxlen=$(($(maxfnlen $BASHCOMP_DIR) + 1 ))
+
+    header
+    
+    printf "%-${maxlen}s| Local  Global |\n"
+    for ((n = 1 ; n <= (maxlen + 17) ; n++)) ; do
+        echo -n -
+    done
+    echo
+    
+    for bashcomp in $BASHCOMP_DIR/* ; do
+        bashcomp="${bashcomp##*/}"
+        local i=3 len="${#bashcomp}"
+        local loc="${INSTALL_DIR}/${bashcomp}"
+        local glob="${GLOBAL_INSTALL_DIR}/${bashcomp}"
+        
+        # skip non-installed
+        [[ ! -e "${loc}" && ! -e "${glob}" ]] && continue
+        
+        echo -ne "${COLOR_ONE}${bashcomp}${NO_COLOR}"        
+        for ((n = 1 ; n <= (maxlen - len) ; n++)) ; do echo -n ' ' ; done
+        echo -n '|'
+
+        [[ ! -e "${loc}" && -e "${glob}" ]] && i=10
+        for ((n = 1 ; n <= i ; n++)) ; do echo -n ' ' ; done
+        
+        [ -e "${loc}" ] && echo -ne "${COLOR_TWO}*${NO_COLOR}"
+        [ -e "${glob}" ] && echo -ne "${COLOR_THREE}*${NO_COLOR}"
+        echo
+    done
+    echo
+}
+
+install()
+{
+    local bashcomp file
+    [ -z "$1" ] && blarg $FUNCNAME
+
+    if [ ! -d "${INSTALL_DIR}" ] ; then
+        mkdir "${INSTALL_DIR}" || return 1
+    fi
+
+    if [ -n "${GLOBAL}" -a ! -d "${GLOBAL_INSTALL_DIR}" ] ; then
+        mkdir "${GLOBAL_INSTALL_DIR}" || return 1
+    fi
+    
+    header
+    for bashcomp in "$@" ; do
+        file="$BASHCOMP_DIR/${bashcomp##*/}"
+        [[ "${bashcomp}" == */* ]] && file=$bashcomp # a path was given
+        
+        if [ ! -e "${file}" ] ; then
+            ewarn "${file##*/} doesn't seem to exist"
+            continue
+        fi
+
+        # already installed
+        if [ -n "${GLOBAL}" -a -e "${GLOBAL_INSTALL_DIR}/${bashcomp}" ] ||
+           [ -z "${GLOBAL}" -a -e "${INSTALL_DIR}/${bashcomp}" ]
+        then
+            ewarn "${bashcomp##*/} is already installed"
+            continue
+        fi
+
+        rv=0
+        ebegin "Installing ${bashcomp##*/}"
+        if [ -z "${GLOBAL}" ] ; then
+            ln -s "$file" "$INSTALL_DIR" || rv=1
+        else
+            if [ -w "${GLOBAL_INSTALL_DIR}" ] ; then
+                ln -s "$file" "$GLOBAL_INSTALL_DIR" || rv=1
+            else
+                eerror "You do not have correct permissions to install $bashcomp"
+                rv=1
+            fi
+        fi
+        eend $rv
+    done
+
+    if [ -z "${GLOBAL}" ] ; then
+        echo
+        echo "If you haven't already, add the following to your ~/.bashrc:"
+        echo -ne "$COLOR_TWO"
+        echo '[ -d ~/.bash_completion.d ] && \'
+        echo -n '{ for i in ~/.bash_completion.d/*; do [ -f $i ] && . $i; done }'
+        echo -e "$NO_COLOR"
+        echo "You must then source your ~/.bashrc for the changes to take effect."
+    fi
+
+    echo
+    return $rv
+}
+
+uninstall()
+{
+    local bashcomp file
+    [ -z "$1" ] && blarg $FUNCNAME
+
+    header
+    for bashcomp in "$@" ; do
+        file="$INSTALL_DIR/$bashcomp"
+        [ -n "${GLOBAL}" ] && file="$GLOBAL_INSTALL_DIR/$bashcomp"
+        
+        if [ ! -e "${file}" ] ; then
+            ewarn "$bashcomp is not installed"
+            continue
+        fi
+        
+        rv=0
+        ebegin "Uninstalling $bashcomp"
+        if [ -w "${file%/*}" ] ; then
+            rm "$file" || rv=1
+        else
+            eerror "You do not have correct permissions to uninstall $bashcomp"
+            rv=1
+        fi
+        eend $rv
+    done
+    echo
+
+    return $rv
+}
+
+###############################################################################
+# main program
+###############################################################################
+
+if [ "$#" -eq 0 ] ; then
+    usage
+    exit 1
+fi
+
+set -- "$@"
+while true ; do
+    case "$1" in
+	-l|--list)
+            list
+            exit $?
+            ;;
+	-i|--install)
+            shift
+            install "$@"
+            exit $?
+	    ;;
+	-u|--uninstall)
+            shift
+            uninstall "$@"
+            exit $?
+	    ;;
+        -g|--global)
+            GLOBAL=yes
+            shift
+            ;;
+	-h|--help)
+	    usage
+	    exit 0
+	    ;;
+	-V|--version)
+	    echo "$PACKAGE-$VERSION"
+	    exit 0
+	    ;;
+	*)
+	    echo "Invalid option specified."
+	    echo "Use --help for more information."
+	    exit 1
+	    ;;
+    esac
+done
+
+# vim: set ft=sh tw=80 sw=4 et :
