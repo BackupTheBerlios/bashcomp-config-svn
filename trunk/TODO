@@ -1,8 +1,15 @@
-[bash-completion-config] 
-created by: ka0ttic on: 11/03/04
 
-[note] Don't display table if # of installed completions = 0
-created by: ka0ttic on: 11/03/04
+Todo List for bash-completion-config
 
-[note] Handle symlinks as ../blah instead of the abs path
-created by: ka0ttic on: 11/03/04
+- Handle symlinks as ../blah instead of using abs path
+
+  Added: 2004-11-14  Completed: incomplete
+  Duration: incomplete  Priority: medium
+
+
+- Don't display table if # of installed completions = 0
+
+  Added: 2004-11-14  Completed: incomplete
+  Duration: incomplete  Priority: low
+
+
