@@ -1,3 +1,9 @@
+Sun Nov 28 12:09:03 2004 Aaron Walker <ka0ttic@gentoo.org>
+
+    * Released 0.7
+    Renamed completion function to use POSIX-sh valid identifier.  Couple
+    other minor bug fixes as well.
+
 Sun Nov 14 15:02:05 2004 Aaron Walker <ka0ttic@gentoo.org>
 
     * Released 0.6
